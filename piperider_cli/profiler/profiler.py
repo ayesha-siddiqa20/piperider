@@ -15,6 +15,7 @@ from sqlalchemy.sql import FromClause
 from sqlalchemy.sql.elements import ColumnClause
 from sqlalchemy.sql.expression import CTE, false, true, table as table_clause, column as column_clause
 from sqlalchemy.types import Float
+from sqlalchemy import or_
 
 from .event import ProfilerEventHandler, DefaultProfilerEventHandler
 from ..configuration import Configuration
@@ -591,6 +592,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 func.count(cte.c.c).label("_valids"),
                 func.count(cte.c.zero_length).label("_zero_length"),
                 func.count(distinct(cte.c.c)).label("_distinct"),
+                func.count(cte.c.c).where((cte.c.c).like(" %") | (cte.c.c).like("% ") ).label("_num_values_with_trailing_leading_spaces"), # new code
                 func.avg(cte.c.len).label("_avg"),
                 func.min(cte.c.len).label("_min"),
                 func.max(cte.c.len).label("_max"),
@@ -601,16 +603,16 @@ class StringColumnProfiler(BaseColumnProfiler):
                     func.cast(cte.c.len, Float) * func.cast(cte.c.len, Float)) - func.sum(cte.c.len) * func.sum(
                     cte.c.len)) / ((func.count(cte.c.len) - 1) * func.count(cte.c.len)).label('_variance'))
                 stmt = select(columns)
-                result = conn.execute(stmt).fetchone()
-                _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _variance = result
+                result = conn.execute(stmt).fetchone()                                   # new code
+                _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _num_values_with_trailing_leading_spaces, _variance = result
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
             else:
                 columns.append(func.stddev(cte.c.len).label("_stddev"))
                 stmt = select(columns)
-                result = conn.execute(stmt).fetchone()
-                _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _stddev = result
+                result = conn.execute(stmt).fetchone()                                  # new code
+                _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max,_num_values_with_trailing_leading_spaces, _stddev = result
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -619,6 +621,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             _max = dtof(_max)
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
+            _num_values_with_trailing_leading_spaces = dtof(_num_values_with_trailing_leading_spaces) # new code
 
             result = {
                 'total': None,
@@ -645,6 +648,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'max_length': _max,
                 'avg': _avg,
                 'avg_length': _avg,
+                'num_values_with_trailing_leading_spaces': _num_values_with_trailing_leading_spaces, # new code
                 'stddev': _stddev,
                 'stddev_length': _stddev,
             }

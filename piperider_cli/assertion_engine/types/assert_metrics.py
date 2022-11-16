@@ -182,6 +182,8 @@ class MetricName:
         self._add('min', 'min', ['integer', 'numeric', 'datetime'])
         self._add('max', 'max', ['integer', 'numeric', 'datetime'])
         self._add('avg', 'average', ['integer', 'numeric'])
+        # new code
+        self._add('max_length_leading_zeroes', 'max_length_leading_zeroes', ['integer', 'numeric'])
         self._add('sum', 'sum', ['integer', 'numeric'])
         self._add('stddev', 'standard deviation', ['integer', 'numeric'])
         self._add('min', 'min length', ['string'])
@@ -201,6 +203,7 @@ class MetricName:
         self._add('p75', '75th percentile', ['integer', 'numeric'])
         self._add('p95', '95th percentile', ['integer', 'numeric'])
         self._add('max', 'max', ['integer', 'numeric'])
+
 
     def _add(self, field, name, col_types: List[str] = None):
         if col_types is None or len(col_types) == 0:

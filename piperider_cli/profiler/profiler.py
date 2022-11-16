@@ -725,6 +725,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 func.count(cte.c.negative).label("_negatives"),
                 func.count(distinct(cte.c.c)).label("_distinct"),
                 func.sum(func.cast(cte.c.c, Float)).label("_sum"),
+                func.max(func.length(func.ltrim(func.cast(cte.c.c, String), '0'))).label("_max_length_leading_zeroes"),
                 func.avg(cte.c.c).label("_avg"),
                 func.min(cte.c.c).label("_min"),
                 func.max(cte.c.c).label("_max"),
@@ -735,16 +736,16 @@ class NumericColumnProfiler(BaseColumnProfiler):
                     func.cast(cte.c.c, Float) * func.cast(cte.c.c, Float)) - func.sum(cte.c.c) * func.sum(cte.c.c)) / (
                                    (func.count(cte.c.c) - 1) * func.count(cte.c.c)).label('_variance'))
                 stmt = select(columns)
-                result = conn.execute(stmt).fetchone()
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _avg, _min, _max, _variance = result
+                result = conn.execute(stmt).fetchone() # new code
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _avg, _min, _max, _variance = result
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
             else:
                 columns.append(func.stddev(cte.c.c).label("_stddev"))
                 stmt = select(columns)
-                result = conn.execute(stmt).fetchone()
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _avg, _min, _max, _stddev = result
+                result = conn.execute(stmt).fetchone() # new code
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _avg, _min, _max, _stddev = result
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -752,6 +753,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _sum = dtof(_sum)
             _min = dtof(_min)
             _max = dtof(_max)
+            _max_length_leading_zeroes = dtof(_max_length_leading_zeroes) # new code
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
 
@@ -779,6 +781,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'min': _min,
                 'max': _max,
                 'sum': _sum,
+                'max_length_leading_zeroes': _max_length_leading_zeroes, #new code
                 'avg': _avg,
                 'stddev': _stddev,
             }

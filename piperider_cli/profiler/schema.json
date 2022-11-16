@@ -249,6 +249,10 @@
                       "description": "The sum of a column's values",
                       "type": "number"
                     },
+                    "max_length_leading_zeroes": {
+                      "description": "The size of the longest value identified after removing leading zeroes",
+                      "type": "number"
+                    },
                     "avg": {
                       "description": "The average of a column's values",
                       "type": "number"

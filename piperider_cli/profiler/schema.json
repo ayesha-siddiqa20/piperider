@@ -253,6 +253,10 @@
                       "description": "The size of the longest value identified after removing leading zeroes",
                       "type": "number"
                     },
+                    "max_length_after_trim": {
+                      "description": "The size of the longest value identified after removing leading or trailing zeroes",
+                      "type": "number"
+                    },
                     "avg": {
                       "description": "The average of a column's values",
                       "type": "number"

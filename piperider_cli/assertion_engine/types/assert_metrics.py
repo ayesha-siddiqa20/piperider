@@ -191,7 +191,7 @@ class MetricName:
         self._add('max', 'max length', ['string'])
         self._add('avg', 'average length', ['string'])
         self._add('stddev', 'std. deviation of length', ['string'])
-        self._add('num_values_with_trailing_leading_spaces', 'number of values with leading/trailing spaces', ['string'])
+        self._add('num_values_with_trailing_leading_spaces', 'num_values_with_trailing_leading_spaces', ['string'])
         self._add('distinct', 'distinct count', ['integer', 'string', 'datetime'])
         self._add('distinct_p', 'distinct percentage', ['integer', 'string', 'datetime'])
         self._add('duplicates', 'duplicate count', ['integer', 'numeric', 'string', 'datetime'])

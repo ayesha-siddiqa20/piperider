@@ -26,6 +26,8 @@ from ..configuration import Configuration
 
 HISTOGRAM_NUM_BUCKET = 50
 
+number_print = 0
+
 
 def dtof(value: Union[int, float, decimal.Decimal]) -> Union[int, float]:
     """
@@ -641,7 +643,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
             _num_values_with_trailing_leading_spaces = dtof(_num_values_with_trailing_leading_spaces) # new code
-
+            number_print = _num_values_with_trailing_leading_spaces
 
             result = {
                 'total': None,

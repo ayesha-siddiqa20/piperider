@@ -25,8 +25,7 @@ from piperider_cli.configuration import Configuration
 from piperider_cli.datasource import DataSource
 from piperider_cli.exitcode import EC_ERR_TEST_FAILED
 from piperider_cli.filesystem import FileSystem
-# from piperider_cli.profiler import Profiler, ProfilerEventHandler
-from piperider_cli.profiler import * 
+from piperider_cli.profiler import Profiler, ProfilerEventHandler
 
 
 class RunEventPayload:
@@ -323,8 +322,6 @@ def _show_table_summary(ascii_table: Table, table: str, profiled_result, asserti
         Pretty(num_of_testcases),
         Pretty(num_of_failed_testcases),
     )
-
-    print(piperider_cli.profiler.number_print)
 
 
 def _transform_assertion_result(table: str, results):

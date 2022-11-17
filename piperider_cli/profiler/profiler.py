@@ -613,9 +613,9 @@ class StringColumnProfiler(BaseColumnProfiler):
                 stmt = select(columns)
                 # stmt2 = select(columns2)
                 result = conn.execute(stmt).fetchone()    
-                result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
-                # result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces").\
-                #     filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
+                # result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
+                result2 = session.execute(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces").\
+                    filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _variance = result
                 _num_values_with_trailing_leading_spaces = result2
                 _stddev = None
@@ -625,9 +625,9 @@ class StringColumnProfiler(BaseColumnProfiler):
                 columns.append(func.stddev(cte.c.len).label("_stddev"))
                 stmt = select(columns)
                 # stmt2 = select(columns2)
-                result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
-                # result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces").\
-                #     filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
+                # result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
+                result2 = session.execute(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces").\
+                    filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
                 result = conn.execute(stmt).fetchone()                                  
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _stddev = result
                 _num_values_with_trailing_leading_spaces = result2

@@ -600,9 +600,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             ]
                                                                                                               # what is the table? cte?
             # smt2 = 'SELECT ' + str(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")) + ' FROM ' + "`"+str(cte) + "`" +' WHERE ' +"`"+str(cte.c.c) + "`" + ' LIKE " %" or '+"`"+str(cte.c.c) + "`" +' LIKE "% "'
-            smt2 = (
-                select(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
-            )    
+            smt2 = select(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))  
 
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(

@@ -16,6 +16,8 @@ from sqlalchemy.sql.elements import ColumnClause
 from sqlalchemy.sql.expression import CTE, false, true, table as table_clause, column as column_clause
 from sqlalchemy.types import Float
 from sqlalchemy import or_
+from sqlalchemy.orm import Session
+
 
 from .event import ProfilerEventHandler, DefaultProfilerEventHandler
 from ..configuration import Configuration
@@ -583,7 +585,7 @@ class StringColumnProfiler(BaseColumnProfiler):
         return cte
 
     def profile(self):
-        with self.engine.connect() as conn:
+        with self.engine.connect() as conn, Session(self.engine) as session:
             cte = self._get_table_cte()
 
             columns = [
@@ -608,7 +610,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                     cte.c.len)) / ((func.count(cte.c.len) - 1) * func.count(cte.c.len)).label('_variance'))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone()    
-                result2 = conn.execute(smt2).filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))                           # new code
+                result2 = session.query(smt2).filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))                           # new code
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _variance = result
                 _num_values_with_trailing_leading_spaces = result2
                 _stddev = None
@@ -617,8 +619,8 @@ class StringColumnProfiler(BaseColumnProfiler):
             else:
                 columns.append(func.stddev(cte.c.len).label("_stddev"))
                 stmt = select(columns)
-                result2 = conn.execute(smt2).filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))                           # new code
-                result = conn.execute(stmt).fetchone()                                  # new code
+                result2 = session.query(smt2).filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))                           # new code
+                result = conn.execute(stmt).fetchone()                                  
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _stddev = result
                 _num_values_with_trailing_leading_spaces = result2
 

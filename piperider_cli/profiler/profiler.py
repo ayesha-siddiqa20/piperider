@@ -599,9 +599,9 @@ class StringColumnProfiler(BaseColumnProfiler):
                 func.max(cte.c.len).label("_max"),
             ]
 
-            columns2 = [
-                func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"),
-            ]
+            # columns2 = [
+            #     func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"),
+            # ]
                                                                                                               # what is the table? cte?
             # smt2 = 'SELECT ' + str(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")) + ' FROM ' + "`"+str(cte) + "`" +' WHERE ' +"`"+str(cte.c.c) + "`" + ' LIKE " %" or '+"`"+str(cte.c.c) + "`" +' LIKE "% "'
 
@@ -610,9 +610,10 @@ class StringColumnProfiler(BaseColumnProfiler):
                     func.cast(cte.c.len, Float) * func.cast(cte.c.len, Float)) - func.sum(cte.c.len) * func.sum(
                     cte.c.len)) / ((func.count(cte.c.len) - 1) * func.count(cte.c.len)).label('_variance'))
                 stmt = select(columns)
-                stmt2 = select(columns2)
+                # stmt2 = select(columns2)
                 result = conn.execute(stmt).fetchone()    
-                result2 = session.query(stmt2).filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))                           # new code
+                result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces").\
+                    filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _variance = result
                 _num_values_with_trailing_leading_spaces = result2
                 _stddev = None
@@ -621,8 +622,9 @@ class StringColumnProfiler(BaseColumnProfiler):
             else:
                 columns.append(func.stddev(cte.c.len).label("_stddev"))
                 stmt = select(columns)
-                stmt2 = select(columns2)
-                result2 = session.query(stmt2).filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))                           # new code
+                # stmt2 = select(columns2)
+                result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces").\
+                    filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
                 result = conn.execute(stmt).fetchone()                                  
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _stddev = result
                 _num_values_with_trailing_leading_spaces = result2

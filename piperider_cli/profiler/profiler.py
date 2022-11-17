@@ -596,8 +596,8 @@ class StringColumnProfiler(BaseColumnProfiler):
                 func.min(cte.c.len).label("_min"),
                 func.max(cte.c.len).label("_max"),
             ]
-
-            smt2 = 'SELECT ' + cte.c.c + ' as _num_values_with_trailing_leading_spaces FROM ' + self.table +' WHERE ' + cte.c.c +' LIKE " %" or ' + cte.c.c +' LIKE "% "'
+                                                                                                              # what is the table? cte?
+            smt2 = 'SELECT ' + func.count(cte.c.c).label(_num_values_with_trailing_leading_spaces) + ' FROM ' + "`"+str(cte) + "`" +' WHERE ' +"`"+str(cte.c.c) + "`" + ' LIKE " %" or '+"`"+str(cte.c.c) + "`" +' LIKE "% "'
 
 
             if self._get_database_backend() == 'sqlite':

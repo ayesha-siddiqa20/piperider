@@ -597,7 +597,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 func.max(cte.c.len).label("_max"),
             ]
 
-            smt2 = conn.execute('SELECT ' + cte.c.c + ' as _num_values_with_trailing_leading_spaces FROM ' + cte +' WHERE ' + cte.c.c +' LIKE " %" or ' + cte.c.c +' LIKE "% "')
+            smt2 = 'SELECT ' + cte.c.c + ' as _num_values_with_trailing_leading_spaces FROM ' + cte +' WHERE ' + cte.c.c +' LIKE " %" or ' + cte.c.c +' LIKE "% "'
 
 
             if self._get_database_backend() == 'sqlite':

@@ -15,7 +15,7 @@ from sqlalchemy.sql import FromClause
 from sqlalchemy.sql.elements import ColumnClause
 from sqlalchemy.sql.expression import CTE, false, true, table as table_clause, column as column_clause
 from sqlalchemy.types import Float
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
 
 
@@ -603,25 +603,23 @@ class StringColumnProfiler(BaseColumnProfiler):
                 func.max(cte.c.len).label("_max"),
             ]
 
-            # columns2 = [
-            #     func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"),
-            # ]
-                                                                                                              # what is the table? cte?
-            # smt2 = 'SELECT ' + str(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")) + ' FROM ' + "`"+str(cte) + "`" +' WHERE ' +"`"+str(cte.c.c) + "`" + ' LIKE " %" or '+"`"+str(cte.c.c) + "`" +' LIKE "% "'
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(
                     func.cast(cte.c.len, Float) * func.cast(cte.c.len, Float)) - func.sum(cte.c.len) * func.sum(
                     cte.c.len)) / ((func.count(cte.c.len) - 1) * func.count(cte.c.len)).label('_variance'))
                 stmt = select(columns)
-                # stmt2 = select(columns2)
                 result = conn.execute(stmt).fetchone()    
-                # result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
                 result2 = (session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")).\
                     filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
                 num_val_result = session.execute(result2)
                 final_result = num_val_result.first()[0]
+
+                result3 = (session.query(func.count(cte.c.c).label("_num_leading_spaces_only")).\
+                    filter(and_(cte.c.c != func.ltrim(cte.c.c), cte.c.c != func.rtrim(cte.c.c)))) # new code.
+                
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _variance = result
                 _num_values_with_trailing_leading_spaces = final_result
+                _num_leading_spaces_only = session.execute(result3).first()[0]
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -634,10 +632,13 @@ class StringColumnProfiler(BaseColumnProfiler):
                     filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
                 num_val_result = session.execute(result2)
                 final_result = num_val_result.first()[0]
+
+                result3 = (session.query(func.count(cte.c.c).label("_num_leading_spaces_only")).\
+                    filter(and_(cte.c.c != func.ltrim(cte.c.c), cte.c.c != func.rtrim(cte.c.c)))) # new code.
                 result = conn.execute(stmt).fetchone()                                  
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _stddev = result
                 _num_values_with_trailing_leading_spaces = final_result
-
+                _num_leading_spaces_only = session.execute(result3).first()[0]
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -647,7 +648,6 @@ class StringColumnProfiler(BaseColumnProfiler):
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
             _num_values_with_trailing_leading_spaces = dtof(_num_values_with_trailing_leading_spaces) # new code
-            number_print = _num_values_with_trailing_leading_spaces
 
             result = {
                 'total': None,
@@ -677,6 +677,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'stddev': _stddev,
                 'stddev_length': _stddev,
                 'num_values_with_trailing_leading_spaces': _num_values_with_trailing_leading_spaces, # new code
+                'num_leading_spaces_only': _num_leading_spaces_only,
 
             }
 

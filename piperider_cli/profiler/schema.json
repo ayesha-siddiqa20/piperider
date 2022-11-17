@@ -261,6 +261,10 @@
                       "description": "Count of records that contain leading and/or trailing spaces",
                       "type": "integer"
                     },
+                    "num_leading_spaces_only": {
+                      "description": "Count of records that contain leading spaces only",
+                      "type": "integer"
+                    },
                     "avg": {
                       "description": "The average of a column's values",
                       "type": "number"

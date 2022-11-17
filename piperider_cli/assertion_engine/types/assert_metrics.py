@@ -182,6 +182,8 @@ class MetricName:
         self._add('min', 'min', ['integer', 'numeric', 'datetime'])
         self._add('max', 'max', ['integer', 'numeric', 'datetime'])
         self._add('avg', 'average', ['integer', 'numeric'])
+        # new code: Skewness
+        self._add('skew', 'skewness', ['integer', 'numeric'])
         # new code
         self._add('max_length_leading_zeroes', 'max_length_leading_zeroes', ['integer', 'numeric'])
         self._add('sum', 'sum', ['integer', 'numeric'])

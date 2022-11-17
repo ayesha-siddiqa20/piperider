@@ -249,6 +249,10 @@
                       "description": "The sum of a column's values",
                       "type": "number"
                     },
+                    "skew": {
+                      "description": "A statistical measure used to describe data distribution. It identifies the measure of asymmetry in the distribution of a data set",
+                      "type": "number"
+                    },
                     "max_length_leading_zeroes": {
                       "description": "The size of the longest value identified after removing leading zeroes",
                       "type": "number"

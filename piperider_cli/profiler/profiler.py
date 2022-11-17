@@ -603,42 +603,41 @@ class StringColumnProfiler(BaseColumnProfiler):
                 func.max(cte.c.len).label("_max"),
             ]
 
+
+            # code for trailing + leading spaces
+            result2 = (session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")).\
+                filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) 
+
+            # code for leading only
+            result3 = (session.query(func.count(cte.c.c).label("_num_leading_spaces_only")).\
+                filter(and_(cte.c.c != func.ltrim(cte.c.c), cte.c.c != func.rtrim(cte.c.c)))) 
+
+            # code for trailing only num_trailing_spaces_only
+            result4 = (session.query(func.count(cte.c.c).label("_num_trailing_spaces_only")).\
+                filter(cte.c.c.like("% "))) 
+
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(
                     func.cast(cte.c.len, Float) * func.cast(cte.c.len, Float)) - func.sum(cte.c.len) * func.sum(
                     cte.c.len)) / ((func.count(cte.c.len) - 1) * func.count(cte.c.len)).label('_variance'))
                 stmt = select(columns)
-                result = conn.execute(stmt).fetchone()    
-                result2 = (session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")).\
-                    filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
-                num_val_result = session.execute(result2)
-                final_result = num_val_result.first()[0]
+                result = conn.execute(stmt).fetchone() 
 
-                result3 = (session.query(func.count(cte.c.c).label("_num_leading_spaces_only")).\
-                    filter(and_(cte.c.c != func.ltrim(cte.c.c), cte.c.c != func.rtrim(cte.c.c)))) # new code.
-                
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _variance = result
-                _num_values_with_trailing_leading_spaces = final_result
+                _num_values_with_trailing_leading_spaces = session.execute(result2).first()[0]
                 _num_leading_spaces_only = session.execute(result3).first()[0]
+                _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
             else:
                 columns.append(func.stddev(cte.c.len).label("_stddev"))
                 stmt = select(columns)
-                # stmt2 = select(columns2)
-                # result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
-                result2 = (session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")).\
-                    filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
-                num_val_result = session.execute(result2)
-                final_result = num_val_result.first()[0]
-
-                result3 = (session.query(func.count(cte.c.c).label("_num_leading_spaces_only")).\
-                    filter(and_(cte.c.c != func.ltrim(cte.c.c), cte.c.c == func.rtrim(cte.c.c)))) # new code.
                 result = conn.execute(stmt).fetchone()                                  
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _stddev = result
-                _num_values_with_trailing_leading_spaces = final_result
+                _num_values_with_trailing_leading_spaces = session.execute(result2).first()[0]
                 _num_leading_spaces_only = session.execute(result3).first()[0]
+                _num_trailing_spaces_only = session.execute(result4).first()[0]
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -649,6 +648,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             _stddev = dtof(_stddev)
             _num_values_with_trailing_leading_spaces = dtof(_num_values_with_trailing_leading_spaces) # new code
             _num_leading_spaces_only = dtof(_num_leading_spaces_only)
+            _num_trailing_spaces_only = dtof(_num_trailing_spaces_only)
             result = {
                 'total': None,
                 'samples': _total,
@@ -678,6 +678,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'stddev_length': _stddev,
                 'num_values_with_trailing_leading_spaces': _num_values_with_trailing_leading_spaces, # new code
                 'num_leading_spaces_only': _num_leading_spaces_only,
+                'num_trailing_spaces_only': _num_trailing_spaces_only,
 
             }
 

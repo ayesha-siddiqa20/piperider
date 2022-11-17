@@ -597,8 +597,10 @@ class StringColumnProfiler(BaseColumnProfiler):
                 func.max(cte.c.len).label("_max"),
             ]
                                                                                                               # what is the table? cte?
-            smt2 = 'SELECT ' + str(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")) + ' FROM ' + "`"+str(cte) + "`" +' WHERE ' +"`"+str(cte.c.c) + "`" + ' LIKE " %" or '+"`"+str(cte.c.c) + "`" +' LIKE "% "'
-
+            # smt2 = 'SELECT ' + str(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")) + ' FROM ' + "`"+str(cte) + "`" +' WHERE ' +"`"+str(cte.c.c) + "`" + ' LIKE " %" or '+"`"+str(cte.c.c) + "`" +' LIKE "% "'
+            smt2 = (
+                select(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
+            )    
 
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(
@@ -606,7 +608,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                     cte.c.len)) / ((func.count(cte.c.len) - 1) * func.count(cte.c.len)).label('_variance'))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone()    
-                result2 = conn.execute(smt2)                           # new code
+                result2 = conn.execute(smt2).filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))                           # new code
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _variance = result
                 _num_values_with_trailing_leading_spaces = result2
                 _stddev = None

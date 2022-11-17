@@ -617,7 +617,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             else:
                 columns.append(func.stddev(cte.c.len).label("_stddev"))
                 stmt = select(columns)
-                result2 = conn.execute(smt2)                           # new code
+                result2 = conn.execute(smt2).filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))                           # new code
                 result = conn.execute(stmt).fetchone()                                  # new code
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _stddev = result
                 _num_values_with_trailing_leading_spaces = result2

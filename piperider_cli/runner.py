@@ -26,7 +26,7 @@ from piperider_cli.datasource import DataSource
 from piperider_cli.exitcode import EC_ERR_TEST_FAILED
 from piperider_cli.filesystem import FileSystem
 # from piperider_cli.profiler import Profiler, ProfilerEventHandler
-import piperider_cli.profiler
+from piperider_cli.profiler import * 
 
 
 class RunEventPayload:

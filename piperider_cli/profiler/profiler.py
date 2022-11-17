@@ -634,7 +634,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 final_result = num_val_result.first()[0]
 
                 result3 = (session.query(func.count(cte.c.c).label("_num_leading_spaces_only")).\
-                    filter(and_(cte.c.c != func.ltrim(cte.c.c), cte.c.c != func.rtrim(cte.c.c)))) # new code.
+                    filter(and_(cte.c.c != func.ltrim(cte.c.c), cte.c.c == func.rtrim(cte.c.c)))) # new code.
                 result = conn.execute(stmt).fetchone()                                  
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _stddev = result
                 _num_values_with_trailing_leading_spaces = final_result
@@ -648,7 +648,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
             _num_values_with_trailing_leading_spaces = dtof(_num_values_with_trailing_leading_spaces) # new code
-
+            _num_leading_spaces_only = dtof(_num_leading_spaces_only)
             result = {
                 'total': None,
                 'samples': _total,

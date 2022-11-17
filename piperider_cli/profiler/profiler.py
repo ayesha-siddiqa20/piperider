@@ -618,8 +618,10 @@ class StringColumnProfiler(BaseColumnProfiler):
                 # result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
                 result2 = (session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")).\
                     filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
+                num_val_result = session.execute(result2)
+                final_result = num_val_result.first()[0]
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _variance = result
-                _num_values_with_trailing_leading_spaces = result2
+                _num_values_with_trailing_leading_spaces = final_result
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -630,9 +632,11 @@ class StringColumnProfiler(BaseColumnProfiler):
                 # result2 = session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces"))
                 result2 = (session.query(func.count(cte.c.c).label("_num_values_with_trailing_leading_spaces")).\
                     filter(or_(cte.c.c.like(" %"), cte.c.c.like("% ")))) # new code
+                num_val_result = session.execute(result2)
+                final_result = num_val_result.first()[0]
                 result = conn.execute(stmt).fetchone()                                  
                 _total, _non_nulls, _valids, _zero_length, _distinct, _avg, _min, _max, _stddev = result
-                _num_values_with_trailing_leading_spaces = result2
+                _num_values_with_trailing_leading_spaces = final_result
 
 
             _nulls = _total - _non_nulls

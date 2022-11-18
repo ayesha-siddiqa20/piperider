@@ -619,7 +619,7 @@ class StringColumnProfiler(BaseColumnProfiler):
 
             # code for invalid_chars
             result5 = (session.query((cte.c.c).label("_invalid_chars")).\
-                filter((cte.c.c).regexp_match('^[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
+                filter(func.REGEXP_CONTAINS(cte.c.c, '^[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
             result5_list = list(chain(*result5))
 
             if self._get_database_backend() == 'sqlite':

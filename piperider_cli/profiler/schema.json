@@ -253,6 +253,26 @@
                       "description": "The size of the longest value identified after removing leading zeroes",
                       "type": "number"
                     },
+                    "max_length_after_trim": {
+                      "description": "The size of the longest value identified after removing leading or trailing zeroes",
+                      "type": "number"
+                    },
+                    "num_values_with_trailing_leading_spaces": {
+                      "description": "Count of records that contain leading and/or trailing spaces",
+                      "type": "integer"
+                    },
+                    "num_leading_spaces_only": {
+                      "description": "Count of records that contain leading spaces only",
+                      "type": "integer"
+                    },
+                    "num_trailing_spaces_only": {
+                      "description": "Count of records that contain trailing spaces only",
+                      "type": "integer"
+                    },
+                    "invalid_chars": {
+                      "description": "List of values in a dataset which contains invalid alphabetical chars",
+                      "type": "string"
+                    },
                     "avg": {
                       "description": "The average of a column's values",
                       "type": "number"

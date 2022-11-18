@@ -623,10 +623,14 @@ class StringColumnProfiler(BaseColumnProfiler):
             result5_list = list(chain(*result5))
 
             # code for mode
-            t = session.query(cte.c.c, func.count(cte.c.c).label("cnt")).group_by(cte.c.c).subquery('t')
-            query2 =  session.query(func.max(t.c.cnt).label("cnt")).subquery('query2')
-            query3 = session.query((cte.c.c, (query2.c.cnt).label("_mode"))).filter((query2.c.cnt).in_(query2))
-            query4 = list(chain(*query3))
+            stmt_mode = """
+            with source_data as (SELECT {}, COUNT(*) as cnt from {} GROUP BY {}),
+            SELECT {} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)
+            """.format(cte.c.c, self.table, cte.c.c, cte.c.c)
+            # t = session.query(cte.c.c, func.count(cte.c.c).label("cnt")).group_by(cte.c.c).subquery('t')
+            # query2 =  session.query(func.max(t.c.cnt).label("cnt")).subquery('query2')
+            # query3 = session.query((cte.c.c, (query2.c.cnt).label("_mode"))).filter((query2.c.cnt).in_(query2))
+            # query4 = list(chain(*query3))
 
 
             if self._get_database_backend() == 'sqlite':
@@ -641,7 +645,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                _mode = query4
+                _mode = list(chain(*conn.execute(stmt_mode)))
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -654,7 +658,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                _mode = query4
+                _mode = list(chain(*conn.execute(stmt_mode)))
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids

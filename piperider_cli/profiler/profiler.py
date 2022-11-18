@@ -29,6 +29,16 @@ HISTOGRAM_NUM_BUCKET = 50
 
 number_print = 0
 
+def str_sql_format(text: str) -> str:
+    """
+    str_sql_format is a helper function to change regular text form to sql approved form with ` ` in it.
+
+    text: the string that will be changed
+
+    """
+    table = text.split(".")
+    new_string = '`'+str(table[0]) + '`' +'.' + '`'+str(table[1]) + '`'
+    return new_string
 
 def dtof(value: Union[int, float, decimal.Decimal]) -> Union[int, float]:
     """
@@ -622,7 +632,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
             result5_list = list(chain(*result5))
 
-            var_col = "`"+str(cte.c)+"`.`c`" 
+            var_col = str_sql_format(cte.c.c)
             var_table =  "`"+str(self.table)+"`"
 
             # code for mode

@@ -194,6 +194,7 @@ class MetricName:
         self._add('num_values_with_trailing_leading_spaces', 'num_values_with_trailing_leading_spaces', ['string'])
         self._add('num_leading_spaces_only', 'num_leading_spaces_only', ['string'])
         self._add('num_trailing_spaces_only', 'num_trailing_spaces_only', ['string'])
+        self._add('invalid_chars', 'invalid_chars', ['string'])
         self._add('distinct', 'distinct count', ['integer', 'string', 'datetime'])
         self._add('distinct_p', 'distinct percentage', ['integer', 'string', 'datetime'])
         self._add('duplicates', 'duplicate count', ['integer', 'numeric', 'string', 'datetime'])

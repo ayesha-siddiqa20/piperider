@@ -17,6 +17,7 @@ from sqlalchemy.sql.expression import CTE, false, true, table as table_clause, c
 from sqlalchemy.types import Float
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
+from itertools import chain
 
 
 
@@ -616,6 +617,11 @@ class StringColumnProfiler(BaseColumnProfiler):
             result4 = (session.query(func.count(cte.c.c).label("_num_trailing_spaces_only")).\
                 filter(cte.c.c.like("% "))) 
 
+            # code for invalid_chars
+            result5 = (session.query((cte.c.c).label("_invalid_chars")).\
+                filter((cte.c.c).regexp_match('^[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
+            result5_list = list(chain(*result5))
+
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(
                     func.cast(cte.c.len, Float) * func.cast(cte.c.len, Float)) - func.sum(cte.c.len) * func.sum(
@@ -627,6 +633,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_values_with_trailing_leading_spaces = session.execute(result2).first()[0]
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
+                _invalid_chars = result5_list
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -638,6 +645,8 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_values_with_trailing_leading_spaces = session.execute(result2).first()[0]
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
+                _invalid_chars = result5_list
+
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -679,6 +688,8 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'num_values_with_trailing_leading_spaces': _num_values_with_trailing_leading_spaces, # new code
                 'num_leading_spaces_only': _num_leading_spaces_only,
                 'num_trailing_spaces_only': _num_trailing_spaces_only,
+                'invalid_chars': _invalid_chars,
+
 
             }
 

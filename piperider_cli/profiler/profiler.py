@@ -622,7 +622,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
             result5_list = list(chain(*result5))
 
-            var_col = "`"+str(cte.c)+"`.c" 
+            var_col = "`"+str(cte.c)+"`.`c`" 
             var_table =  "`"+str(self.table)+"`"
 
             # code for mode

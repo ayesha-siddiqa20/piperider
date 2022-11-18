@@ -760,6 +760,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 func.sum(func.cast(cte.c.c, Float)).label("_sum"),
                 func.max(func.length(func.ltrim(func.cast(cte.c.c, String), '0'))).label("_max_length_leading_zeroes"),
                 func.max(func.length(func.replace(func.ltrim(func.replace(func.cast(cte.c.c, String), '0', ' ')), ' ', '0'))).label("_max_length_after_trim"),
+                func.min(func.length(func.cast(cte.c.c, String))).label("_min_length"),
                 func.avg(cte.c.c).label("_avg"),
                 func.min(cte.c.c).label("_min"),
                 func.max(cte.c.c).label("_max"),
@@ -771,7 +772,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                                    (func.count(cte.c.c) - 1) * func.count(cte.c.c)).label('_variance'))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _avg, _min, _max, _variance = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _variance = result
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -779,7 +780,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 columns.append(func.stddev(cte.c.c).label("_stddev"))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _avg, _min, _max, _stddev = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _stddev = result
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -789,6 +790,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _max = dtof(_max)
             _max_length_leading_zeroes = dtof(_max_length_leading_zeroes) # new code
             _max_length_after_trim = dtof(_max_length_after_trim)
+            _min_length = dtof(_min_length)
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
 
@@ -818,6 +820,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'sum': _sum,
                 'max_length_leading_zeroes': _max_length_leading_zeroes, #new code
                 'max_length_after_trim': _max_length_after_trim,
+                'min_length': _min_length,
                 'avg': _avg,
                 'stddev': _stddev,
             }

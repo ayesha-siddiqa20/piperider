@@ -187,7 +187,7 @@ class MetricName:
         self._add('max_length_after_trim', 'max_length_after_trim', ['integer', 'numeric'])
         self._add('sum', 'sum', ['integer', 'numeric'])
         self._add('stddev', 'standard deviation', ['integer', 'numeric'])
-        self._add('min', 'min length', ['string'])
+        self._add('min', 'min length', ['string', 'numeric', 'integer'])
         self._add('max', 'max length', ['string'])
         self._add('avg', 'average length', ['string'])
         self._add('stddev', 'std. deviation of length', ['string'])

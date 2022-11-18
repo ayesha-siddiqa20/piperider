@@ -637,7 +637,7 @@ class StringColumnProfiler(BaseColumnProfiler):
 
             # code for mode
             stmt_mode = """
-            with source_data as (SELECT {}, COUNT(*) as cnt from {} GROUP BY {})
+            ,with source_data as (SELECT {}, COUNT(*) as cnt from {} GROUP BY {})
             SELECT {} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)
             """.format(var_col, var_table, var_col, var_col)
             # t = session.query(cte.c.c, func.count(cte.c.c).label("cnt")).group_by(cte.c.c).subquery('t')

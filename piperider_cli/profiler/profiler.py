@@ -658,7 +658,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                _mode = list(chain(*conn.execute(stmt_mode)))
+                _mode = list(chain(*(session.query(cte.c.c, stmt_mode))))
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -671,7 +671,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                _mode = list(chain(*conn.execute(stmt_mode)))
+                _mode = list(chain(*(session.query(cte.c.c, stmt_mode))))
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids

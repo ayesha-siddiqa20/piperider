@@ -732,14 +732,13 @@ class NumericColumnProfiler(BaseColumnProfiler):
             ]
 
             if self._get_database_backend() == 'sqlite':
-                columns.append((func.count(cte.c.c) * func.sum(
+                variance = (func.count(cte.c.c) * func.sum(
                     func.cast(cte.c.c, Float) * func.cast(cte.c.c, Float)) - func.sum(cte.c.c) * func.sum(cte.c.c)) / (
-                                   (func.count(cte.c.c) - 1) * func.count(cte.c.c)).label('_variance'))
+                                   (func.count(cte.c.c) - 1) * func.count(cte.c.c))
+                columns.append(variance.label('_variance'))
                 
                 # new code: skewness [3 * (mean - median) / stddev]
-                columns.append(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / ((func.count(cte.c.c) * func.sum(
-                    func.cast(cte.c.c, Float) * func.cast(cte.c.c, Float)) - func.sum(cte.c.c) * func.sum(cte.c.c)) / (
-                                   (func.count(cte.c.c) - 1) * func.count(cte.c.c)))**(1/2)).label("_skew"))
+                columns.append(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / variance**(1/2)).label("_skew"))
 
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
@@ -748,9 +747,10 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
             else:
-                columns.append(func.stddev(cte.c.c).label("_stddev"))
+                stddev = func.stddev(cte.c.c)
+                columns.append(stddev.label("_stddev"))
                 # new code: skewness [3 * (mean - median) / stddev]
-                columns.append(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / func.stddev(cte.c.c)).label("_skew"))
+                columns.append(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / stddev).label("_skew"))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _skew, _max_length_leading_zeroes, _avg, _min, _max, _stddev = result

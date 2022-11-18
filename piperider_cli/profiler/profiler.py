@@ -622,6 +622,13 @@ class StringColumnProfiler(BaseColumnProfiler):
                 filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
             result5_list = list(chain(*result5))
 
+            # code for mode
+            t = session.query(cte.c.c, func.count(cte.c.c).label("cnt")).group_by(cte.c.c).subquery('t')
+            query2 =  session.query(func.max(t.c.cnt).label("cnt")).subquery('query2')
+            query3 = session.query((cte.c.c, (query2.c.cnt).label("_mode"))).filter((query2.c.cnt).in_(query2))
+            query4 = list(chain(*query3))
+
+
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(
                     func.cast(cte.c.len, Float) * func.cast(cte.c.len, Float)) - func.sum(cte.c.len) * func.sum(
@@ -634,6 +641,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
+                _mode = query4
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -646,7 +654,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-
+                _mode = query4
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -689,7 +697,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'num_leading_spaces_only': _num_leading_spaces_only,
                 'num_trailing_spaces_only': _num_trailing_spaces_only,
                 'invalid_chars': _invalid_chars,
-
+                'mode': _mode,
 
             }
 

@@ -257,6 +257,10 @@
                       "description": "The size of the longest value identified after removing leading or trailing zeroes",
                       "type": "number"
                     },
+                    "mode": {
+                      "description": "The size of the longest value identified after removing leading or trailing zeroes",
+                      "type": "array"
+                    },
                     "num_values_with_trailing_leading_spaces": {
                       "description": "Count of records that contain leading and/or trailing spaces",
                       "type": "integer"

@@ -11,7 +11,7 @@ from sqlalchemy import MetaData, Table, Column, String, Integer, Numeric, Date, 
 from sqlalchemy.engine import Engine, Connection
 from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.pool import SingletonThreadPool
-from sqlalchemy.sql import FromClause
+from sqlalchemy.sql import FromClause, text
 from sqlalchemy.sql.elements import ColumnClause
 from sqlalchemy.sql.expression import CTE, false, true, table as table_clause, column as column_clause
 from sqlalchemy.types import Float
@@ -637,7 +637,7 @@ class StringColumnProfiler(BaseColumnProfiler):
 
             # code for mode
             stmt_mode = """
-            ,with source_data as (SELECT {}, COUNT(*) as cnt from {} GROUP BY {})
+            with source_data as (SELECT {}, COUNT(*) as cnt from {} GROUP BY {})
             SELECT {} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)
             """.format(var_col, var_table, var_col, var_col)
             # t = session.query(cte.c.c, func.count(cte.c.c).label("cnt")).group_by(cte.c.c).subquery('t')
@@ -671,7 +671,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                _mode = list(chain(*(session.query(cte.c.c, stmt_mode))))
+                _mode = list(chain(*(session.query(cte.c.c, text(stmt_mode)))))
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids

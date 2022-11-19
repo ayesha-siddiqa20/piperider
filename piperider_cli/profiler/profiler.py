@@ -638,7 +638,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                     c1.label("orig")
                 ]).select_from(t1).cte()
 
-            var_col = str_sql_format(str(cte2.c1.c))
+            var_col = str_sql_format(str(cte2.c.c1))
             var_table =  "`"+str(self.table)+"`"
 
             # code for mode

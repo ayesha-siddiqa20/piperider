@@ -667,7 +667,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 # query2 = select((var_col).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
                 # q1 = session.query(text(stmt_mode))
                 # q1 = q1.cte('source_data')
-                _mode = list(chain(*(session.query(query2))))
+                _mode = list(chain(*(session.execute(query2))))
                 # _mode = list(chain(*(session.query(text(stmt_mode)))))
                 _stddev = None
                 if _variance is not None:
@@ -684,7 +684,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 # q1 = session.query(text(stmt_mode))
                 # q1 = q1.cte('source_data')
                 # _mode = list(chain(*(session.query(q1, text(stmt_mode2)))))
-                _mode = list(chain(*(session.query(query2))))
+                _mode = list(chain(*(session.execute(query2))))
 
 
             _nulls = _total - _non_nulls

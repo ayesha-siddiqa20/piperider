@@ -643,8 +643,11 @@ class StringColumnProfiler(BaseColumnProfiler):
 
             # code for mode
 
-            stmt_mode = """{}, COUNT(*) as cnt from {} GROUP BY {})""".format(var_col, var_table, var_col)
-            stmt_mode2 = """{} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)""".format(var_col)
+            # stmt_mode = """{}, COUNT(*) as cnt from {} GROUP BY {})""".format(var_col, var_table, var_col)
+            # stmt_mode2 = """{} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)""".format(var_col)
+
+            query1 = select(var_col, func.count().label("cnt")).group_by(var_col).cte("query1")
+            query2 = select((var_col).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
 
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(
@@ -658,10 +661,13 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                # mode code continued .. 
-                q1 = session.query(text(stmt_mode))
-                q1 = q1.cte('source_data')
-                _mode = list(chain(*(session.query(q1, text(stmt_mode2)))))
+                # mode code continued .. , 
+
+                # query1 = select(var_col, func.count().label("cnt")).group_by(var_col).cte("query1")
+                # query2 = select((var_col).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
+                # q1 = session.query(text(stmt_mode))
+                # q1 = q1.cte('source_data')
+                _mode = list(chain(*(session.query(query2))))
                 # _mode = list(chain(*(session.query(text(stmt_mode)))))
                 _stddev = None
                 if _variance is not None:
@@ -675,9 +681,11 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                q1 = session.query(text(stmt_mode))
-                q1 = q1.cte('source_data')
-                _mode = list(chain(*(session.query(q1, text(stmt_mode2)))))
+                # q1 = session.query(text(stmt_mode))
+                # q1 = q1.cte('source_data')
+                # _mode = list(chain(*(session.query(q1, text(stmt_mode2)))))
+                _mode = list(chain(*(session.query(query2))))
+
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids

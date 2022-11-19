@@ -185,6 +185,7 @@ class MetricName:
         # new code
         self._add('max_length_leading_zeroes', 'max_length_leading_zeroes', ['integer', 'numeric'])
         self._add('max_length_after_trim', 'max_length_after_trim', ['integer', 'numeric'])
+        self._add('mode', 'mode', ['integer', 'numeric', 'string'])
         self._add('sum', 'sum', ['integer', 'numeric'])
         self._add('stddev', 'standard deviation', ['integer', 'numeric'])
         self._add('min', 'min length', ['string', 'numeric', 'integer'])

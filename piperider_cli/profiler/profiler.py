@@ -11,7 +11,7 @@ from sqlalchemy import MetaData, Table, Column, String, Integer, Numeric, Date, 
 from sqlalchemy.engine import Engine, Connection
 from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.pool import SingletonThreadPool
-from sqlalchemy.sql import FromClause
+from sqlalchemy.sql import FromClause, text
 from sqlalchemy.sql.elements import ColumnClause
 from sqlalchemy.sql.expression import CTE, false, true, table as table_clause, column as column_clause
 from sqlalchemy.types import Float
@@ -29,6 +29,16 @@ HISTOGRAM_NUM_BUCKET = 50
 
 number_print = 0
 
+def str_sql_format(text: str) -> str:
+    """
+    str_sql_format is a helper function to change regular text form to sql approved form with ` ` in it.
+
+    text: the string that will be changed
+
+    """
+    table = text.split(".")
+    new_string = '`'+str(table[0]) + '`' +'.' + '`'+str(table[1]) + '`'
+    return new_string
 
 def dtof(value: Union[int, float, decimal.Decimal]) -> Union[int, float]:
     """
@@ -622,6 +632,11 @@ class StringColumnProfiler(BaseColumnProfiler):
                 filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
             result5_list = list(chain(*result5))
 
+            # code for mode
+            t1, c1 = self._get_limited_table_cte()
+            query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
+            query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
+
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(
                     func.cast(cte.c.len, Float) * func.cast(cte.c.len, Float)) - func.sum(cte.c.len) * func.sum(
@@ -634,6 +649,8 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
+                # mode code continued .. 
+                _mode = list(chain(*(session.execute(query2))))
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -646,6 +663,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
+                _mode = list(chain(*(session.execute(query2))))
 
 
             _nulls = _total - _non_nulls
@@ -689,7 +707,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'num_leading_spaces_only': _num_leading_spaces_only,
                 'num_trailing_spaces_only': _num_trailing_spaces_only,
                 'invalid_chars': _invalid_chars,
-
+                'mode': _mode,
 
             }
 
@@ -758,7 +776,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
         return cte
 
     def profile(self):
-        with self.engine.connect() as conn:
+        with self.engine.connect() as conn, Session(self.engine) as session:
             cte = self._get_table_cte()
 
             columns = [
@@ -777,6 +795,10 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 func.max(cte.c.c).label("_max"),
             ]
 
+            t1, c1 = self._get_limited_table_cte()
+            query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
+            query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
+
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.c) * func.sum(
                     func.cast(cte.c.c, Float) * func.cast(cte.c.c, Float)) - func.sum(cte.c.c) * func.sum(cte.c.c)) / (
@@ -785,6 +807,8 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 result = conn.execute(stmt).fetchone() # new code
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _variance = result
                 _stddev = None
+                _mode = list(chain(*(session.execute(query2))))
+
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
             else:
@@ -792,6 +816,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _stddev = result
+                _mode = list(chain(*(session.execute(query2))))
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -834,6 +859,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'min_length': _min_length,
                 'avg': _avg,
                 'stddev': _stddev,
+                'mode': _mode,
             }
 
             # uniqueness
@@ -1129,7 +1155,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
         return cte
 
     def profile(self):
-        with self.engine.connect() as conn:
+        with self.engine.connect() as conn, Session(self.engine) as session:
             cte = self._get_table_cte()
 
             stmt = select([
@@ -1140,10 +1166,17 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 func.min(cte.c.c).label("_min"),
                 func.max(cte.c.c).label("_max"),
             ])
+
+            t1, c1 = self._get_limited_table_cte()
+            query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
+            query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
+
             result = conn.execute(stmt).fetchone()
             _total, _non_nulls, _valids, _distinct, _min, _max = result
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
+            _mode = list(chain(*(session.execute(query2))))
+
 
             if self._get_database_backend() == 'sqlite':
                 if isinstance(self.column.type, Date):
@@ -1169,6 +1202,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 'distinct_p': percentage(_distinct, _valids),
                 'min': _min.isoformat() if _min is not None else None,
                 'max': _max.isoformat() if _max is not None else None,
+                'mode': _mode,
             }
 
             # uniqueness
@@ -1340,7 +1374,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
     def profile(self):
         cte = self._get_table_cte()
 
-        with self.engine.connect() as conn:
+        with self.engine.connect() as conn, Session(self.engine) as session:
             stmt = select([
                 func.count().label("_total"),
                 func.count(cte.c.orig).label("_non_nulls"),
@@ -1348,11 +1382,17 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 func.count(cte.c.true_count).label("_trues"),
                 func.count(distinct(cte.c.c)).label("_distinct"),
             ]).select_from(cte)
+
+            t1, c1 = self._get_limited_table_cte()
+            query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
+            query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
+
             result = conn.execute(stmt).fetchone()
             _total, _non_nulls, _valids, _trues, _distinct = result
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
             _falses = _valids - _trues
+            _mode = list(chain(*(session.execute(query2))))
 
             result = {
                 'total': None,
@@ -1372,6 +1412,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'falses_p': percentage(_falses, _total),
                 'distinct': _distinct,
                 'distinct_p': percentage(_distinct, _valids),
+                'mode': _mode,
 
                 # deprecated
                 'distribution': {

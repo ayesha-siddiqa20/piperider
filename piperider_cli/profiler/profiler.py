@@ -1155,7 +1155,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
         return cte
 
     def profile(self):
-        with self.engine.connect() as conn:
+        with self.engine.connect() as conn, Session(self.engine) as session:
             cte = self._get_table_cte()
 
             stmt = select([
@@ -1166,10 +1166,17 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 func.min(cte.c.c).label("_min"),
                 func.max(cte.c.c).label("_max"),
             ])
+
+            t1, c1 = self._get_limited_table_cte()
+            query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
+            query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
+
             result = conn.execute(stmt).fetchone()
             _total, _non_nulls, _valids, _distinct, _min, _max = result
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
+            _mode = list(chain(*(session.execute(query2))))
+
 
             if self._get_database_backend() == 'sqlite':
                 if isinstance(self.column.type, Date):
@@ -1195,6 +1202,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 'distinct_p': percentage(_distinct, _valids),
                 'min': _min.isoformat() if _min is not None else None,
                 'max': _max.isoformat() if _max is not None else None,
+                'mode': _mode,
             }
 
             # uniqueness
@@ -1366,7 +1374,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
     def profile(self):
         cte = self._get_table_cte()
 
-        with self.engine.connect() as conn:
+        with self.engine.connect() as conn, Session(self.engine) as session:
             stmt = select([
                 func.count().label("_total"),
                 func.count(cte.c.orig).label("_non_nulls"),
@@ -1374,11 +1382,17 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 func.count(cte.c.true_count).label("_trues"),
                 func.count(distinct(cte.c.c)).label("_distinct"),
             ]).select_from(cte)
+
+            t1, c1 = self._get_limited_table_cte()
+            query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
+            query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
+
             result = conn.execute(stmt).fetchone()
             _total, _non_nulls, _valids, _trues, _distinct = result
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
             _falses = _valids - _trues
+            _mode = list(chain(*(session.execute(query2))))
 
             result = {
                 'total': None,
@@ -1398,6 +1412,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'falses_p': percentage(_falses, _total),
                 'distinct': _distinct,
                 'distinct_p': percentage(_distinct, _valids),
+                'mode': _mode,
 
                 # deprecated
                 'distribution': {

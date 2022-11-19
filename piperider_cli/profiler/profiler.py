@@ -643,8 +643,8 @@ class StringColumnProfiler(BaseColumnProfiler):
 
             # code for mode
 
-            stmt_mode = """SELECT {}, COUNT(*) as cnt from {} GROUP BY {})""".format(var_col, var_table, var_col)
-            stmt_mode2 = """SELECT {} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)""".format(var_col)
+            stmt_mode = """{}, COUNT(*) as cnt from {} GROUP BY {})""".format(var_col, var_table, var_col)
+            stmt_mode2 = """{} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)""".format(var_col)
 
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(

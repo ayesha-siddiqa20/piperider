@@ -638,16 +638,16 @@ class StringColumnProfiler(BaseColumnProfiler):
             #         c1.label("orig")
             #     ]).select_from(t1).cte()
 
-            var_col = str_sql_format(str(c1))
-            var_table =  "`"+str(self.table)+"`"
+            # var_col = str_sql_format(str(c1))
+            # var_table =  "`"+str(self.table)+"`"
 
             # code for mode
 
             # stmt_mode = """{}, COUNT(*) as cnt from {} GROUP BY {})""".format(var_col, var_table, var_col)
             # stmt_mode2 = """{} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)""".format(var_col)
 
-            query1 = select(var_col, func.count().label("cnt")).group_by(var_col).cte("query1")
-            query2 = select((var_col).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
+            query1 = select(c1, func.count().label("cnt")).group_by(c1).cte("query1")
+            query2 = select((c1).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
 
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(

@@ -632,7 +632,13 @@ class StringColumnProfiler(BaseColumnProfiler):
                 filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
             result5_list = list(chain(*result5))
 
-            var_col = str_sql_format(str(cte.c.c))
+            t1, c1 = self._get_limited_table_cte()
+            cte2 = select([
+                    c1.label("c"),
+                    c1.label("orig")
+                ]).select_from(t1).cte()
+
+            var_col = str_sql_format(str(cte2.c1.c))
             var_table =  "`"+str(self.table)+"`"
 
             # code for mode
@@ -640,10 +646,6 @@ class StringColumnProfiler(BaseColumnProfiler):
             with source_data as (SELECT {}, COUNT(*) as cnt from {} GROUP BY {})
             SELECT {} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)
             """.format(var_col, var_table, var_col, var_col)
-            # t = session.query(cte.c.c, func.count(cte.c.c).label("cnt")).group_by(cte.c.c).subquery('t')
-            # query2 =  session.query(func.max(t.c.cnt).label("cnt")).subquery('query2')
-            # query3 = session.query((cte.c.c, (query2.c.cnt).label("_mode"))).filter((query2.c.cnt).in_(query2))
-            # query4 = list(chain(*query3))
 
 
             if self._get_database_backend() == 'sqlite':

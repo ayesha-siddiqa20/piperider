@@ -632,20 +632,8 @@ class StringColumnProfiler(BaseColumnProfiler):
                 filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
             result5_list = list(chain(*result5))
 
-            t1, c1 = self._get_limited_table_cte()
-            # cte2 = select([
-            #         c1.label("c"),
-            #         c1.label("orig")
-            #     ]).select_from(t1).cte()
-
-            # var_col = str_sql_format(str(c1))
-            # var_table =  "`"+str(self.table)+"`"
-
             # code for mode
-
-            # stmt_mode = """{}, COUNT(*) as cnt from {} GROUP BY {})""".format(var_col, var_table, var_col)
-            # stmt_mode2 = """{} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)""".format(var_col)
-
+            t1, c1 = self._get_limited_table_cte()
             query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
             query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
 
@@ -661,14 +649,8 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                # mode code continued .. , 
-
-                # query1 = select(var_col, func.count().label("cnt")).group_by(var_col).cte("query1")
-                # query2 = select((var_col).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
-                # q1 = session.query(text(stmt_mode))
-                # q1 = q1.cte('source_data')
+                # mode code continued .. 
                 _mode = list(chain(*(session.execute(query2))))
-                # _mode = list(chain(*(session.query(text(stmt_mode)))))
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -681,9 +663,6 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                # q1 = session.query(text(stmt_mode))
-                # q1 = q1.cte('source_data')
-                # _mode = list(chain(*(session.query(q1, text(stmt_mode2)))))
                 _mode = list(chain(*(session.execute(query2))))
 
 
@@ -797,7 +776,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
         return cte
 
     def profile(self):
-        with self.engine.connect() as conn:
+        with self.engine.connect() as conn, Session(self.engine) as session:
             cte = self._get_table_cte()
 
             columns = [
@@ -816,6 +795,10 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 func.max(cte.c.c).label("_max"),
             ]
 
+            t1, c1 = self._get_limited_table_cte()
+            query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
+            query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
+
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.c) * func.sum(
                     func.cast(cte.c.c, Float) * func.cast(cte.c.c, Float)) - func.sum(cte.c.c) * func.sum(cte.c.c)) / (
@@ -824,6 +807,8 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 result = conn.execute(stmt).fetchone() # new code
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _variance = result
                 _stddev = None
+                _mode = list(chain(*(session.execute(query2))))
+
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
             else:
@@ -831,6 +816,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _stddev = result
+                _mode = list(chain(*(session.execute(query2))))
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -873,6 +859,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'min_length': _min_length,
                 'avg': _avg,
                 'stddev': _stddev,
+                'mode': _mode,
             }
 
             # uniqueness

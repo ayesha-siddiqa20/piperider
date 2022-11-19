@@ -642,11 +642,9 @@ class StringColumnProfiler(BaseColumnProfiler):
             var_table =  "`"+str(self.table)+"`"
 
             # code for mode
-            stmt_mode = """
-            with source_data as (SELECT {}, COUNT(*) as cnt from {} GROUP BY {})
-            SELECT {} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)
-            """.format(var_col, var_table, var_col, var_col)
 
+            stmt_mode = """SELECT {}, COUNT(*) as cnt from {} GROUP BY {})""".format(var_col, var_table, var_col)
+            stmt_mode2 = """SELECT {} as _mode from source_data WHERE cnt in (SELECT MAX(cnt) from source_data)""".format(var_col)
 
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.len) * func.sum(
@@ -660,7 +658,11 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                _mode = list(chain(*(session.query(text(stmt_mode)))))
+                # mode code continued .. 
+                q1 = session.query(text(stmt_mode))
+                q1 = q1.cte('source_data')
+                _mode = list(chain(*(session.query(q1, text(stmt_mode2)))))
+                # _mode = list(chain(*(session.query(text(stmt_mode)))))
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -673,7 +675,9 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _num_leading_spaces_only = session.execute(result3).first()[0]
                 _num_trailing_spaces_only = session.execute(result4).first()[0]
                 _invalid_chars = result5_list
-                _mode = list(chain(*(session.query(text(stmt_mode)))))
+                q1 = session.query(text(stmt_mode))
+                q1 = q1.cte('source_data')
+                _mode = list(chain(*(session.query(q1, text(stmt_mode2)))))
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids

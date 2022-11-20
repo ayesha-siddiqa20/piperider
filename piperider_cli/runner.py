@@ -27,6 +27,7 @@ from piperider_cli.exitcode import EC_ERR_TEST_FAILED
 from piperider_cli.filesystem import FileSystem
 from piperider_cli.profiler import Profiler, ProfilerEventHandler
 
+name_of_result_table = ""
 
 class RunEventPayload:
 
@@ -305,6 +306,7 @@ def _show_summary(profiled_result, assertion_results, assertion_exceptions, dbt_
 
 
 def _show_table_summary(ascii_table: Table, table: str, profiled_result, assertion_results):
+    name_of_result_table = table
     profiled_columns = profiled_result['tables'][table].get('col_count')
     num_of_testcases = 0
     num_of_failed_testcases = 0
@@ -664,6 +666,9 @@ class Runner():
 
         output_path = prepare_default_output_path(filesystem, created_at, ds)
         output_file = os.path.join(output_path, 'run.json')
+
+        console.print(run_result)
+        console.print(run_result["tables"][name_of_result_table]["columns"])
 
         with open(output_file, 'w') as f:
             f.write(json.dumps(run_result, separators=(',', ':')))

@@ -665,6 +665,8 @@ class Runner():
         output_path = prepare_default_output_path(filesystem, created_at, ds)
         output_file = os.path.join(output_path, 'run.json')
 
+        console.print(run_result)
+
         with open(output_file, 'w') as f:
             f.write(json.dumps(run_result, separators=(',', ':')))
 
@@ -674,7 +676,7 @@ class Runner():
         if skip_report:
             console.print(f'Results saved to {output if output else output_path}')
 
-        _analyse_and_log_run_event(run_result, assertion_results, dbt_test_results, dbt_command)
+        # _analyse_and_log_run_event(run_result, assertion_results, dbt_test_results, dbt_command)
 
         if not _check_test_status(assertion_results, assertion_exceptions, dbt_test_results):
             return EC_ERR_TEST_FAILED

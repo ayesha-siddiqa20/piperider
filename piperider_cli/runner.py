@@ -667,8 +667,8 @@ class Runner():
         output_path = prepare_default_output_path(filesystem, created_at, ds)
         output_file = os.path.join(output_path, 'run.json')
 
-        console.print(run_result)
-        console.print(run_result["tables"][name_of_result_table]["columns"])
+        # console.print(run_result)
+        # console.print(run_result["tables"][name_of_result_table]["columns"])
 
         with open(output_file, 'w') as f:
             f.write(json.dumps(run_result, separators=(',', ':')))

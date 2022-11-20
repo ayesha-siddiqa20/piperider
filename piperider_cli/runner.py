@@ -27,8 +27,6 @@ from piperider_cli.exitcode import EC_ERR_TEST_FAILED
 from piperider_cli.filesystem import FileSystem
 from piperider_cli.profiler import Profiler, ProfilerEventHandler
 
-table_name = ""
-
 
 class RunEventPayload:
 
@@ -291,7 +289,6 @@ def _show_summary(profiled_result, assertion_results, assertion_exceptions, dbt_
     for t in tables:
         _show_table_summary(ascii_table, t, profiled_result, assertion_results)
 
-
     if ascii_dbt_table:
         # Display DBT Tests Summary
         console.rule('dbt')
@@ -308,7 +305,6 @@ def _show_summary(profiled_result, assertion_results, assertion_exceptions, dbt_
 
 
 def _show_table_summary(ascii_table: Table, table: str, profiled_result, assertion_results):
-    table_name = table
     profiled_columns = profiled_result['tables'][table].get('col_count')
     num_of_testcases = 0
     num_of_failed_testcases = 0
@@ -630,18 +626,18 @@ class Runner():
         assertion_results, assertion_exceptions = _execute_assertions(console, engine, ds.name, output,
                                                                       profiler_result, created_at)
 
-        run_result['tests'] = []
-        if assertion_results or dbt_test_results:
-            console.rule('Assertion Results')
-            if dbt_test_results:
-                console.rule('dbt')
-                _show_dbt_test_result(dbt_test_results)
-                run_result['tests'].extend(dbt_test_results)
-                if assertion_results:
-                    console.rule('PipeRider')
-            if assertion_results:
-                _show_assertion_result(assertion_results, assertion_exceptions)
-                run_result['tests'].extend([r.to_result_entry() for r in assertion_results])
+        # run_result['tests'] = []
+        # if assertion_results or dbt_test_results:
+        #     console.rule('Assertion Results')
+        #     if dbt_test_results:
+        #         console.rule('dbt')
+        #         _show_dbt_test_result(dbt_test_results)
+        #         run_result['tests'].extend(dbt_test_results)
+        #         if assertion_results:
+        #             console.rule('PipeRider')
+        #     if assertion_results:
+        #         _show_assertion_result(assertion_results, assertion_exceptions)
+        #         run_result['tests'].extend([r.to_result_entry() for r in assertion_results])
 
         console.rule('Summary')
 
@@ -651,9 +647,9 @@ class Runner():
         #             continue
         #         run_result['tables'][k]['dbt_assertion_result'] = v
 
-        # for t in run_result['tables']:
-        #     run_result['tables'][t]['piperider_assertion_result'] = _transform_assertion_result(t, assertion_results)
-        #     _clean_up_profile_null_properties(run_result['tables'][t])
+        for t in run_result['tables']:
+            run_result['tables'][t]['piperider_assertion_result'] = _transform_assertion_result(t, assertion_results)
+            _clean_up_profile_null_properties(run_result['tables'][t])
         _show_summary(run_result, assertion_results, assertion_exceptions, dbt_test_results)
         _show_recommended_assertion_notice_message(console, assertion_results)
 
@@ -661,18 +657,18 @@ class Runner():
             dbt_adapter.append_descriptions(run_result, default_schema)
         _append_descriptions_from_assertion(run_result)
 
-        run_result['id'] = run_id
-        run_result['created_at'] = datetime_to_str(created_at)
-        run_result['datasource'] = dict(name=ds.name, type=ds.type_name)
-        decorate_with_metadata(run_result)
+        # run_result['id'] = run_id
+        # run_result['created_at'] = datetime_to_str(created_at)
+        # run_result['datasource'] = dict(name=ds.name, type=ds.type_name)
+        # decorate_with_metadata(run_result)
 
         output_path = prepare_default_output_path(filesystem, created_at, ds)
         output_file = os.path.join(output_path, 'run.json')
 
-        console.print(run_result["tables"][table_name]["columns"])
+        console.print(run_result)
 
         with open(output_file, 'w') as f:
-            f.write(json.dumps(run_result["tables"][table_name]["columns"], separators=(',', ':')))
+            f.write(json.dumps(run_result, separators=(',', ':')))
 
         if output:
             clone_directory(output_path, output)
@@ -680,7 +676,7 @@ class Runner():
         if skip_report:
             console.print(f'Results saved to {output if output else output_path}')
 
-        _analyse_and_log_run_event(run_result, assertion_results, dbt_test_results, dbt_command)
+        # _analyse_and_log_run_event(run_result, assertion_results, dbt_test_results, dbt_command)
 
         if not _check_test_status(assertion_results, assertion_exceptions, dbt_test_results):
             return EC_ERR_TEST_FAILED

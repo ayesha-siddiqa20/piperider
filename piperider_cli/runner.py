@@ -27,7 +27,6 @@ from piperider_cli.exitcode import EC_ERR_TEST_FAILED
 from piperider_cli.filesystem import FileSystem
 from piperider_cli.profiler import Profiler, ProfilerEventHandler
 
-name_of_result_table = ""
 
 class RunEventPayload:
 
@@ -306,7 +305,6 @@ def _show_summary(profiled_result, assertion_results, assertion_exceptions, dbt_
 
 
 def _show_table_summary(ascii_table: Table, table: str, profiled_result, assertion_results):
-    name_of_result_table = table
     profiled_columns = profiled_result['tables'][table].get('col_count')
     num_of_testcases = 0
     num_of_failed_testcases = 0
@@ -650,6 +648,7 @@ class Runner():
                 run_result['tables'][k]['dbt_assertion_result'] = v
 
         for t in run_result['tables']:
+            name_of_result_table = t
             run_result['tables'][t]['piperider_assertion_result'] = _transform_assertion_result(t, assertion_results)
             _clean_up_profile_null_properties(run_result['tables'][t])
         _show_summary(run_result, assertion_results, assertion_exceptions, dbt_test_results)

@@ -323,24 +323,8 @@
                       "description": "The maximum length of a string column",
                       "type": "integer"
                     },
-                    "p5": {
-                      "description": "The quantile value of the dataset (5th percentile)",
-                      "type": "number"
-                    },
                     "p25": {
                       "description": "The quantile value of the dataset (25th percentile)",
-                      "type": "number"
-                    },
-                    "p50": {
-                      "description": "The quantile value of the dataset (50th percentile)",
-                      "type": "number"
-                    },
-                    "p75": {
-                      "description": "The quantile value of the dataset (75th percentile)",
-                      "type": "number"
-                    },
-                    "p95": {
-                      "description": "The quantile value of the dataset (95th percentile)",
                       "type": "number"
                     }
                   }
@@ -483,50 +467,6 @@
         "type": {
           "type": "string"
         },
-        "labels": {
-          "type": "array",
-          "items": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "counts": {
-          "type": "array",
-          "items": {
-            "type": "integer"
-          }
-        },
-        "bin_edges": {
-          "type": "array",
-          "items": {
-            "oneOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ]
-          }
-        }
-      }
-    },
-    "histogram": {
-      "title": "Histogram",
-      "type": "object",
-      "required": [
-        "labels",
-        "counts",
-        "bin_edges"
-      ],
-      "additionalProperties": false,
-      "properties": {
         "labels": {
           "type": "array",
           "items": {

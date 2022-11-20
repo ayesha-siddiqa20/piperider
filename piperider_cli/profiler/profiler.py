@@ -722,24 +722,24 @@ class StringColumnProfiler(BaseColumnProfiler):
             })
 
             # top k
-            topk = None
-            if _valids > 0:
-                topk = profile_topk(conn, cte.c.c)
-            result['topk'] = topk
+            # topk = None
+            # if _valids > 0:
+            #     topk = profile_topk(conn, cte.c.c)
+            # result['topk'] = topk
 
             # histogram of string length
-            histogram = None
-            if _valids > 0:
-                histogram = profile_histogram(conn, cte, cte.c.len, _min, _max, True)
-            result['histogram'] = histogram
-            result['histogram_length'] = histogram
+            # histogram = None
+            # if _valids > 0:
+            #     histogram = profile_histogram(conn, cte, cte.c.len, _min, _max, True)
+            # result['histogram'] = histogram
+            # result['histogram_length'] = histogram
 
-            # deprecated
-            result['distribution'] = {
-                "type": "topk",
-                "labels": topk["values"],
-                "counts": topk["counts"],
-            } if topk else None
+            # # deprecated
+            # result['distribution'] = {
+            #     "type": "topk",
+            #     "labels": topk["values"],
+            #     "counts": topk["counts"],
+            # } if topk else None
 
             return result
 
@@ -873,37 +873,37 @@ class NumericColumnProfiler(BaseColumnProfiler):
             })
 
             # histogram
-            histogram = None
-            if _valids > 0:
-                histogram = profile_histogram(conn, cte, cte.c.c, _min, _max, self.is_integer)
-            result['histogram'] = histogram
+            # histogram = None
+            # if _valids > 0:
+            #     histogram = profile_histogram(conn, cte, cte.c.c, _min, _max, self.is_integer)
+            # result['histogram'] = histogram
 
             # quantile
             quantile = {}
             if _valids > 0:
                 quantile = self._profile_quantile(conn, cte, cte.c.c, _valids)
             result.update({
-                'p5': quantile.get('p5'),
+                # 'p5': quantile.get('p5'),
                 'p25': quantile.get('p25'),
-                'p50': quantile.get('p50'),
-                'p75': quantile.get('p75'),
-                'p95': quantile.get('p95'),
+                # 'p50': quantile.get('p50'),
+                # 'p75': quantile.get('p75'),
+                # 'p95': quantile.get('p95'),
             })
 
-            # top k (integer only)
-            if self.is_integer:
-                topk = None
-                if _valids > 0:
-                    topk = profile_topk(conn, cte.c.c)
-                result["topk"] = topk
+            # # top k (integer only)
+            # if self.is_integer:
+            #     topk = None
+            #     if _valids > 0:
+            #         topk = profile_topk(conn, cte.c.c)
+            #     result["topk"] = topk
 
             # deprecated
-            result["distribution"] = {
-                "type": "histogram",
-                "labels": histogram["labels"],
-                "counts": histogram["counts"],
-                "bin_edges": histogram["bin_edges"],
-            } if histogram else None
+            # result["distribution"] = {
+            #     "type": "histogram",
+            #     "labels": histogram["labels"],
+            #     "counts": histogram["counts"],
+            #     "bin_edges": histogram["bin_edges"],
+            # } if histogram else None
 
             return result
 
@@ -933,11 +933,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
             n, v = row
             quantile.append(v)
         return {
-            'p5': dtof(quantile[5 * n_bucket // 100]),
+            # 'p5': dtof(quantile[5 * n_bucket // 100]),
             'p25': dtof(quantile[25 * n_bucket // 100]),
-            'p50': dtof(quantile[50 * n_bucket // 100]),
-            'p75': dtof(quantile[75 * n_bucket // 100]),
-            'p95': dtof(quantile[95 * n_bucket // 100]),
+            # 'p50': dtof(quantile[50 * n_bucket // 100]),
+            # 'p75': dtof(quantile[75 * n_bucket // 100]),
+            # 'p95': dtof(quantile[95 * n_bucket // 100]),
         }
 
     def _profile_quantile_via_query_one_by_one(
@@ -966,11 +966,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
             return dtof(result)
 
         return {
-            'p5': ntile(5),
+            # 'p5': ntile(5),
             'p25': ntile(25),
-            'p50': ntile(50),
-            'p75': ntile(75),
-            'p95': ntile(95),
+            # 'p50': ntile(50),
+            # 'p75': ntile(75),
+            # 'p95': ntile(95),
         }
 
     def _profile_quantile(
@@ -1006,7 +1006,8 @@ class NumericColumnProfiler(BaseColumnProfiler):
         elif self._get_database_backend() == 'duckdb':
             selects = [
                 func.approx_quantile(column, literal_column(f"{percentile}")) for percentile in
-                [0.05, 0.25, 0.5, 0.75, 0.95]
+                [0.25]
+                #[0.05, 0.25, 0.5, 0.75, 0.95]
             ]
         elif self._get_database_backend() == 'bigquery':
             # BigQuery does not support WITHIN, change to use over
@@ -1031,17 +1032,17 @@ class NumericColumnProfiler(BaseColumnProfiler):
             #     percentile_disc(0.95) within group (order by column)
             # from table
             selects = [
-                func.percentile_disc(percentile).within_group(column) for percentile in [0.05, 0.25, 0.5, 0.75, 0.95]
+                func.percentile_disc(percentile).within_group(column) for percentile in [0.25]#[0.05, 0.25, 0.5, 0.75, 0.95]
             ]
 
         stmt = select(selects).select_from(table)
         result = conn.execute(stmt).fetchone()
         return {
-            'p5': dtof(result[0]),
-            'p25': dtof(result[1]),
-            'p50': dtof(result[2]),
-            'p75': dtof(result[3]),
-            'p95': dtof(result[4]),
+            # 'p5': dtof(result[0]),
+            'p25': dtof(result[0]),
+            # 'p50': dtof(result[2]),
+            # 'p75': dtof(result[3]),
+            # 'p95': dtof(result[4]),
         }
 
     def _profile_histogram(
@@ -1216,19 +1217,19 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             })
 
             # histogram
-            histogram = None
-            _type = None
-            if _min and _max:
-                histogram, _type = self._profile_histogram(conn, cte, cte.c.c, _min, _max)
-            result['histogram'] = histogram
+            # histogram = None
+            # _type = None
+            # if _min and _max:
+            #     histogram, _type = self._profile_histogram(conn, cte, cte.c.c, _min, _max)
+            # result['histogram'] = histogram
 
-            # deprecated
-            result["distribution"] = {
-                "type": _type,
-                "labels": histogram["labels"],
-                "counts": histogram["counts"],
-                "bin_edges": histogram["bin_edges"],
-            } if histogram else None
+            # # deprecated
+            # result["distribution"] = {
+            #     "type": _type,
+            #     "labels": histogram["labels"],
+            #     "counts": histogram["counts"],
+            #     "bin_edges": histogram["bin_edges"],
+            # } if histogram else None
 
             return result
 
@@ -1415,11 +1416,11 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'mode': _mode,
 
                 # deprecated
-                'distribution': {
-                    'type': "topk",
-                    'labels': ["False", "True"],
-                    'counts': [_falses, _trues]
-                }
+                # 'distribution': {
+                #     'type': "topk",
+                #     'labels': ["False", "True"],
+                #     'counts': [_falses, _trues]
+                # }
             }
 
             return result

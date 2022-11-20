@@ -82,43 +82,43 @@ def _get_run_json_path(filesystem: FileSystem, input=None):
     return run_json
 
 
-class GenerateReport:
-    @staticmethod
-    def exec(input=None, report_dir=None, output=None):
-        filesystem = FileSystem(report_dir=report_dir)
-        raise_exception_when_directory_not_writable(output)
+# class GenerateReport:
+#     @staticmethod
+#     def exec(input=None, report_dir=None, output=None):
+#         filesystem = FileSystem(report_dir=report_dir)
+#         raise_exception_when_directory_not_writable(output)
 
-        console = Console()
+#         console = Console()
 
-        from piperider_cli import data
-        report_template_dir = os.path.join(os.path.dirname(data.__file__), 'report', 'single-report')
-        with open(os.path.join(report_template_dir, 'index.html')) as f:
-            report_template_html = f.read()
+#         from piperider_cli import data
+#         report_template_dir = os.path.join(os.path.dirname(data.__file__), 'report', 'single-report')
+#         with open(os.path.join(report_template_dir, 'index.html')) as f:
+#             report_template_html = f.read()
 
-        run_json_path = _get_run_json_path(filesystem, input)
-        if not os.path.isfile(run_json_path):
-            print(os.path.abspath(run_json_path))
-            raise PipeRiderNoProfilingResultError(run_json_path)
+#         run_json_path = _get_run_json_path(filesystem, input)
+#         if not os.path.isfile(run_json_path):
+#             print(os.path.abspath(run_json_path))
+#             raise PipeRiderNoProfilingResultError(run_json_path)
 
-        with open(run_json_path) as f:
-            result = json.loads(f.read())
-        if not _validate_input_result(result):
-            console.print(f'[bold red]Error: {run_json_path} is invalid[/bold red]')
-            return
+#         with open(run_json_path) as f:
+#             result = json.loads(f.read())
+#         if not _validate_input_result(result):
+#             console.print(f'[bold red]Error: {run_json_path} is invalid[/bold red]')
+#             return
 
-        console.print(f'[bold dark_orange]Generating reports from:[/bold dark_orange] {run_json_path}')
+#         console.print(f'[bold dark_orange]Generating reports from:[/bold dark_orange] {run_json_path}')
 
-        def output_report(target_directory):
-            clone_directory(report_template_dir, target_directory)
-            _generate_static_html(result, report_template_html, target_directory)
+#         def output_report(target_directory):
+#             clone_directory(report_template_dir, target_directory)
+#             _generate_static_html(result, report_template_html, target_directory)
 
-        # output the report to the default directory (same with the run.json)
-        default_output_directory = os.path.dirname(run_json_path)
-        output_report(default_output_directory)
+#         # output the report to the default directory (same with the run.json)
+#         default_output_directory = os.path.dirname(run_json_path)
+#         output_report(default_output_directory)
 
-        if output:
-            output_report(output)
-            shutil.copyfile(run_json_path, os.path.join(output, os.path.basename(run_json_path)))
-            console.print(f"Report generated in {output}/index.html")
-        else:
-            console.print(f"Report generated in {default_output_directory}/index.html")
+#         if output:
+#             output_report(output)
+#             shutil.copyfile(run_json_path, os.path.join(output, os.path.basename(run_json_path)))
+#             console.print(f"Report generated in {output}/index.html")
+#         else:
+#             console.print(f"Report generated in {default_output_directory}/index.html")

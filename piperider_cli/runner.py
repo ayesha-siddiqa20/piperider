@@ -27,6 +27,8 @@ from piperider_cli.exitcode import EC_ERR_TEST_FAILED
 from piperider_cli.filesystem import FileSystem
 from piperider_cli.profiler import Profiler, ProfilerEventHandler
 
+table_name = ""
+
 
 class RunEventPayload:
 
@@ -289,6 +291,7 @@ def _show_summary(profiled_result, assertion_results, assertion_exceptions, dbt_
     for t in tables:
         _show_table_summary(ascii_table, t, profiled_result, assertion_results)
 
+
     if ascii_dbt_table:
         # Display DBT Tests Summary
         console.rule('dbt')
@@ -305,6 +308,7 @@ def _show_summary(profiled_result, assertion_results, assertion_exceptions, dbt_
 
 
 def _show_table_summary(ascii_table: Table, table: str, profiled_result, assertion_results):
+    table_name = table
     profiled_columns = profiled_result['tables'][table].get('col_count')
     num_of_testcases = 0
     num_of_failed_testcases = 0
@@ -647,9 +651,9 @@ class Runner():
         #             continue
         #         run_result['tables'][k]['dbt_assertion_result'] = v
 
-        for t in run_result['tables']:
-            run_result['tables'][t]['piperider_assertion_result'] = _transform_assertion_result(t, assertion_results)
-            _clean_up_profile_null_properties(run_result['tables'][t])
+        # for t in run_result['tables']:
+        #     run_result['tables'][t]['piperider_assertion_result'] = _transform_assertion_result(t, assertion_results)
+        #     _clean_up_profile_null_properties(run_result['tables'][t])
         _show_summary(run_result, assertion_results, assertion_exceptions, dbt_test_results)
         _show_recommended_assertion_notice_message(console, assertion_results)
 
@@ -665,10 +669,10 @@ class Runner():
         output_path = prepare_default_output_path(filesystem, created_at, ds)
         output_file = os.path.join(output_path, 'run.json')
 
-        console.print(run_result)
+        console.print(run_result["tables"][table_name]["columns"])
 
         with open(output_file, 'w') as f:
-            f.write(json.dumps(run_result, separators=(',', ':')))
+            f.write(json.dumps(run_result["tables"][table_name]["columns"], separators=(',', ':')))
 
         if output:
             clone_directory(output_path, output)

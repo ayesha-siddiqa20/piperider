@@ -366,7 +366,7 @@ class Profiler:
         profile_start = time.perf_counter()
 
         # Profile table metrics
-        self._profile_table_metadata(result, table)
+        # self._profile_table_metadata(result, table)
         self._profile_table_duplicate_rows(result, table)
         self.event_handler.handle_table_progress(result, col_count, col_index)
 

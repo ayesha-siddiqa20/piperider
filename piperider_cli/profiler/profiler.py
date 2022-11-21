@@ -738,11 +738,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 columns.append(variance.label('_variance'))
                 
                 # new code: skewness [3 * (mean - median) / stddev]
-                columns.append(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / variance**(1/2)).label("_skew"))
+                # columns.append(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / variance**(1/2)).label("_skew"))
 
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _skew, _max_length_leading_zeroes, _avg, _min, _max, _variance = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _avg, _min, _max, _variance = result
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)

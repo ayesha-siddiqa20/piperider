@@ -785,7 +785,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 func.max(func.length(func.replace(func.ltrim(func.replace(func.cast(cte.c.c, String), '0', ' ')), ' ', '0'))).label("_max_length_after_trim"),
                 func.min(func.length(func.cast(cte.c.c, String))).label("_min_length"),
                 func.avg(cte.c.c).label("_avg"),
-                func.avg(func.length(cte.c.c)).label("_avg_length"),
+                func.avg(func.length(func.cast(cte.c.c), String)).label("_avg_length"),
                 func.min(cte.c.c).label("_min"),
                 func.max(cte.c.c).label("_max"),
                 func.max(func.length(cte.c.c)).label("_max_length")

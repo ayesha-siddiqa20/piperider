@@ -844,7 +844,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
 
             # 4th moment
             deviation = func.cast(cte.c.c, Float) - result['avg']
-            moment = func.sum(deviation ** 4)
+            moment = func.sum(deviation * deviation * deviation * deviation)
             stmt = select(moment)
             _moment = dtof(conn.execute(stmt).fetchone()[0])
             result["kurtosis"] = _moment / result['total'] * result['stddev'] ** 4

@@ -351,10 +351,8 @@ class Profiler:
             "name": table.name,
             "row_count": 0,
             "samples": 0,
-            "samples_p": None,
             "col_count": col_count,
             "duplicate_rows": None,
-            "duplicate_rows_p": None,
             "columns": columns
         }
 
@@ -553,17 +551,12 @@ class BaseColumnProfiler:
 
             return {
                 'total': None,
-                'samples': _total,
-                'samples_p': None,
-                'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valid,
-                'valids_p': percentage(_valid, _total),
-                'invalids': 0,
-                'invalids_p': 0,
-                'distribution': None,
+                # 'valids': _valid,
+                # 'valids_p': percentage(_valid, _total),
+                # 'invalids': 0,
+                # 'invalids_p': 0,
+                # 'distribution': None,
             }
 
 
@@ -632,6 +625,13 @@ class StringColumnProfiler(BaseColumnProfiler):
                 filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
             result5_list = list(chain(*result5))
 
+            # code for number of empty values
+
+            result6 = (session.query((cte.c.c).label("_num_empty_values")).\
+                filter(and_(func.REGEXP_CONTAINS(cte.c.c, '[\s]+'), ~func.REGEXP_CONTAINS(cte.c.c, '[^\s]+'))))
+            _num_empty_values = session.execute(result6).first()[0]
+
+
             # code for mode
             t1, c1 = self._get_limited_table_cte()
             query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
@@ -665,7 +665,6 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _invalid_chars = result5_list
                 _mode = list(chain(*(session.execute(query2))))
 
-
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
             _non_zero_length = _valids - _zero_length
@@ -678,23 +677,8 @@ class StringColumnProfiler(BaseColumnProfiler):
             _num_trailing_spaces_only = dtof(_num_trailing_spaces_only)
             result = {
                 'total': None,
-                'samples': _total,
-                'samples_p': None,
-                'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
-                'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valids,
-                'valids_p': percentage(_valids, _total),
-                'invalids': _invalids,
-                'invalids_p': percentage(_invalids, _total),
-                'zero_length': _zero_length,
-                'zero_length_p': percentage(_zero_length, _total),
-                'non_zero_length': _non_zero_length,
-                'non_zero_length_p': percentage(_non_zero_length, _total),
-
+                'nulls': _nulls,            
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'min': _min,
                 'min_length': _min,
                 'max': _max,
@@ -702,23 +686,33 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'avg': _avg,
                 'avg_length': _avg,
                 'stddev': _stddev,
-                'stddev_length': _stddev,
                 'num_values_with_trailing_leading_spaces': _num_values_with_trailing_leading_spaces, # new code
                 'num_leading_spaces_only': _num_leading_spaces_only,
                 'num_trailing_spaces_only': _num_trailing_spaces_only,
                 'invalid_chars': _invalid_chars,
+                'sum': None,
+                'max_length_leading_zeroes': None, #new code
+                'max_length_after_trim': None,
                 'mode': _mode,
+                'num_empty_values': _num_empty_values,
 
             }
 
             # uniqueness
             _non_duplicates = profile_non_duplicate(conn, cte, cte.c.c)
             _duplicates = _valids - _non_duplicates
+            _empty_null_constraint = False
+            if _duplicates > 0:
+                _empty_null_constraint = True
+
             result.update({
                 "duplicates": _duplicates,
-                "duplicates_p": percentage(_duplicates, _valids),
                 "non_duplicates": _non_duplicates,
-                "non_duplicates_p": percentage(_non_duplicates, _valids),
+                'p5': None,
+                'p25': None,
+                'p50': None,
+                'p75': None,
+                'p95': None,
             })
 
             # top k
@@ -791,8 +785,10 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 func.max(func.length(func.replace(func.ltrim(func.replace(func.cast(cte.c.c, String), '0', ' ')), ' ', '0'))).label("_max_length_after_trim"),
                 func.min(func.length(func.cast(cte.c.c, String))).label("_min_length"),
                 func.avg(cte.c.c).label("_avg"),
+                func.avg(func.length(cte.c.c)).label("_avg_length"),
                 func.min(cte.c.c).label("_min"),
                 func.max(cte.c.c).label("_max"),
+                func.max(func.length(cte.c.c)).label("_max_length")
             ]
 
             t1, c1 = self._get_limited_table_cte()
@@ -805,7 +801,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                                    (func.count(cte.c.c) - 1) * func.count(cte.c.c)).label('_variance'))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _variance = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _avg_length, _min, _max, _max_length, _variance = result
                 _stddev = None
                 _mode = list(chain(*(session.execute(query2))))
 
@@ -815,7 +811,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 columns.append(func.stddev(cte.c.c).label("_stddev"))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _stddev = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _avg_length, _min, _max, _max_length, _stddev = result
                 _mode = list(chain(*(session.execute(query2))))
 
             _nulls = _total - _non_nulls
@@ -824,42 +820,36 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _sum = dtof(_sum)
             _min = dtof(_min)
             _max = dtof(_max)
+            _max_length = dtof(_max_length)
             _max_length_leading_zeroes = dtof(_max_length_leading_zeroes) # new code
             _max_length_after_trim = dtof(_max_length_after_trim)
             _min_length = dtof(_min_length)
             _avg = dtof(_avg)
+            _avg_length = dtof(_avg_length)
             _stddev = dtof(_stddev)
 
             result = {
                 'total': None,
-                'samples': _total,
-                'samples_p': None,
-                'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valids,
-                'valids_p': percentage(_valids, _total),
-                'invalids': _invalids,
-                'invalids_p': percentage(_invalids, _total),
-                'zeros': _zeros,
-                'zeros_p': percentage(_zeros, _total),
-                'negatives': _negatives,
-                'negatives_p': percentage(_negatives, _total),
-                'positives': _positives,
-                'positives_p': percentage(_positives, _total),
 
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'min': _min,
+                'min_length': _min_length,
                 'max': _max,
+                'max_length': _max_length, 
+                'avg': _avg,
+                'avg_length': _avg_length,
+                'stddev': _stddev,
+                'num_values_with_trailing_leading_spaces': None, # new code
+                'num_leading_spaces_only': None,
+                'num_trailing_spaces_only': None,
+                'invalid_chars': None,
                 'sum': _sum,
                 'max_length_leading_zeroes': _max_length_leading_zeroes, #new code
                 'max_length_after_trim': _max_length_after_trim,
-                'min_length': _min_length,
-                'avg': _avg,
-                'stddev': _stddev,
                 'mode': _mode,
+                'num_empty_values': None,
+
             }
 
             # uniqueness
@@ -867,9 +857,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _duplicates = _valids - _non_duplicates
             result.update({
                 "duplicates": _duplicates,
-                "duplicates_p": percentage(_duplicates, _valids),
                 "non_duplicates": _non_duplicates,
-                "non_duplicates_p": percentage(_non_duplicates, _valids),
             })
 
             # histogram
@@ -883,11 +871,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
             if _valids > 0:
                 quantile = self._profile_quantile(conn, cte, cte.c.c, _valids)
             result.update({
-                # 'p5': quantile.get('p5'),
+                'p5': quantile.get('p5'),
                 'p25': quantile.get('p25'),
-                # 'p50': quantile.get('p50'),
-                # 'p75': quantile.get('p75'),
-                # 'p95': quantile.get('p95'),
+                'p50': quantile.get('p50'),
+                'p75': quantile.get('p75'),
+                'p95': quantile.get('p95'),
             })
 
             # # top k (integer only)
@@ -933,11 +921,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
             n, v = row
             quantile.append(v)
         return {
-            # 'p5': dtof(quantile[5 * n_bucket // 100]),
+            'p5': dtof(quantile[5 * n_bucket // 100]),
             'p25': dtof(quantile[25 * n_bucket // 100]),
-            # 'p50': dtof(quantile[50 * n_bucket // 100]),
-            # 'p75': dtof(quantile[75 * n_bucket // 100]),
-            # 'p95': dtof(quantile[95 * n_bucket // 100]),
+            'p50': dtof(quantile[50 * n_bucket // 100]),
+            'p75': dtof(quantile[75 * n_bucket // 100]),
+            'p95': dtof(quantile[95 * n_bucket // 100]),
         }
 
     def _profile_quantile_via_query_one_by_one(
@@ -966,11 +954,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
             return dtof(result)
 
         return {
-            # 'p5': ntile(5),
+            'p5': ntile(5),
             'p25': ntile(25),
-            # 'p50': ntile(50),
-            # 'p75': ntile(75),
-            # 'p95': ntile(95),
+            'p50': ntile(50),
+            'p75': ntile(75),
+            'p95': ntile(95),
         }
 
     def _profile_quantile(
@@ -1038,11 +1026,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
         stmt = select(selects).select_from(table)
         result = conn.execute(stmt).fetchone()
         return {
-            # 'p5': dtof(result[0]),
+            'p5': dtof(result[0]),
             'p25': dtof(result[0]),
-            # 'p50': dtof(result[2]),
-            # 'p75': dtof(result[3]),
-            # 'p95': dtof(result[4]),
+            'p50': dtof(result[2]),
+            'p75': dtof(result[3]),
+            'p95': dtof(result[4]),
         }
 
     def _profile_histogram(
@@ -1189,21 +1177,23 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
 
             result = {
                 'total': None,
-                'samples': _total,
-                'samples_p': None,
-                'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valids,
-                'valids_p': percentage(_valids, _total),
-                'invalids': _invalids,
-                'invalids_p': percentage(_invalids, _total),
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'min': _min.isoformat() if _min is not None else None,
                 'max': _max.isoformat() if _max is not None else None,
+                'max_length': _max,
+                'avg': None,
+                'avg_length': None,
+                'stddev': None,
+                'num_values_with_trailing_leading_spaces': None, # new code
+                'num_leading_spaces_only': None,
+                'num_trailing_spaces_only': None,
+                'invalid_chars': None,
+                'sum': None,
+                'max_length_leading_zeroes': None, #new code
+                'max_length_after_trim': None,
                 'mode': _mode,
+                'num_empty_values': None,
             }
 
             # uniqueness
@@ -1211,9 +1201,12 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             _duplicates = _valids - _non_duplicates
             result.update({
                 "duplicates": _duplicates,
-                "duplicates_p": percentage(_duplicates, _valids),
                 "non_duplicates": _non_duplicates,
-                "non_duplicates_p": percentage(_non_duplicates, _valids),
+                'p5': None,
+                'p25':None,
+                'p50': None,
+                'p75': None,
+                'p95': None,
             })
 
             # histogram
@@ -1397,23 +1390,25 @@ class BooleanColumnProfiler(BaseColumnProfiler):
 
             result = {
                 'total': None,
-                'samples': _total,
-                'samples_p': None,
-                'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valids,
-                'valids_p': percentage(_valids, _total),
-                'invalids': _invalids,
-                'invalids_p': percentage(_invalids, _total),
-                'trues': _trues,
-                'trues_p': percentage(_trues, _total),
-                'falses': _falses,
-                'falses_p': percentage(_falses, _total),
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
+                'min': None,
+                'min_length': None,
+                'max': None,
+                'max_length': None,
+                'avg': None,
+                'avg_length': None,
+                'stddev': None,
+                'num_values_with_trailing_leading_spaces': None, # new code
+                'num_leading_spaces_only': None,
+                'num_trailing_spaces_only': None,
+                'invalid_chars': None,
+                'sum': None,
+                'max_length_leading_zeroes': None, #new code
+                'max_length_after_trim': None,
                 'mode': _mode,
+                'num_empty_values': None,
+                
 
                 # deprecated
                 # 'distribution': {
@@ -1422,6 +1417,19 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 #     'counts': [_falses, _trues]
                 # }
             }
+
+                        # uniqueness
+            _non_duplicates = profile_non_duplicate(conn, cte, cte.c.c)
+            _duplicates = _valids - _non_duplicates
+            result.update({
+                "duplicates": _duplicates,
+                "non_duplicates": _non_duplicates,
+                'p5': None,
+                'p25':None,
+                'p50': None,
+                'p75': None,
+                'p95': None,
+            })
 
             return result
 

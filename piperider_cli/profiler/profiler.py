@@ -15,6 +15,8 @@ from sqlalchemy.sql import FromClause
 from sqlalchemy.sql.elements import ColumnClause
 from sqlalchemy.sql.expression import CTE, false, true, table as table_clause, column as column_clause
 from sqlalchemy.types import Float
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
 from .event import ProfilerEventHandler, DefaultProfilerEventHandler
 from ..configuration import Configuration
@@ -714,7 +716,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
         return cte
 
     def profile(self):
-        with self.engine.connect() as conn:
+        with self.engine.connect() as conn, Session(self.engine) as session:
             cte = self._get_table_cte()
 
             columns = [
@@ -737,12 +739,13 @@ class NumericColumnProfiler(BaseColumnProfiler):
                                    (func.count(cte.c.c) - 1) * func.count(cte.c.c))
                 columns.append(variance.label('_variance'))
                 
-                # new code: skewness [3 * (mean - median) / stddev]
-                # columns.append(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / variance**(1/2)).label("_skew"))
-
+                
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _avg, _min, _max, _variance = result
+                # new code: skewness [3 * (mean - median) / stddev]
+                result2 = session.query(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / variance**(1/2)).label("_skew"))
+                _skew = session.execute(result2)
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
@@ -750,10 +753,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 stddev = func.stddev(cte.c.c)
                 columns.append(stddev.label("_stddev"))
                 # new code: skewness [3 * (mean - median) / stddev]
-                columns.append(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / stddev).label("_skew"))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _skew, _max_length_leading_zeroes, _avg, _min, _max, _stddev = result
+                result2 = session.query(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / stddev).label("_skew"))
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _avg, _min, _max, _stddev = result
+                _skew = session.execute(result2)
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids

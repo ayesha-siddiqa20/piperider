@@ -17,6 +17,7 @@ from sqlalchemy.sql.expression import CTE, false, true, table as table_clause, c
 from sqlalchemy.types import Float
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import select
 
 from .event import ProfilerEventHandler, DefaultProfilerEventHandler
 from ..configuration import Configuration
@@ -842,9 +843,8 @@ class NumericColumnProfiler(BaseColumnProfiler):
             # kurtosis
 
             # 4th moment
-            # s = dtof(conn.execute(func.sum(select((cte.c.c - result['avg']) ** 4))))
-            # moment4 = dtof(session.execute(func.sum((cte.c.c - result['avg'] ** 4))).first()[0])
-            result["kurtosis"] = func.Kurtosis(cte.c.c)
+            moment = dtof(session.execute(session.query(func.sum((cte.c.c - result['avg']) ** 4) / func.count(cte.c.c))))
+            result["kurtosis"] = moment / result['stddev'] ** 4
             
             return result
 

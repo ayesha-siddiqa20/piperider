@@ -743,21 +743,15 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _avg, _min, _max, _variance = result
-                # new code: skewness [3 * (mean - median) / stddev]
-                result2 = session.query(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / variance**(1/2)).label("_skew"))
-                _skew = session.execute(result2)
                 _stddev = None
                 if _variance is not None:
                     _stddev = math.sqrt(_variance)
             else:
                 stddev = func.stddev(cte.c.c)
                 columns.append(stddev.label("_stddev"))
-                # new code: skewness [3 * (mean - median) / stddev]
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                result2 = session.query(((func.avg(cte.c.c)-func.percentile_disc(cte.c.c, 0.5).over()) * 3 / stddev).label("_skew"))
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _avg, _min, _max, _stddev = result
-                _skew = session.execute(result2)
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -765,10 +759,10 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _sum = dtof(_sum)
             _min = dtof(_min)
             _max = dtof(_max)
-            _skew = dtof(_skew)
             _max_length_leading_zeroes = dtof(_max_length_leading_zeroes) # new code
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
+
 
             result = {
                 'total': None,
@@ -794,7 +788,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'min': _min,
                 'max': _max,
                 'sum': _sum,
-                'skew': _skew, #new code: skewness
                 'max_length_leading_zeroes': _max_length_leading_zeroes, #new code
                 'avg': _avg,
                 'stddev': _stddev,
@@ -843,6 +836,8 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 "bin_edges": histogram["bin_edges"],
             } if histogram else None
 
+            # skewness
+            result["skewness"] = (3 * (result['avg'] - result['p50']) / result['stddev'])
             return result
 
     def _profile_quantile_via_window_function(

@@ -842,7 +842,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             # kurtosis
 
             # 4th moment
-            moment = session.execute(session.query(func.sum(cte.c.c - result['avg'])))
+            moment = session.execute(session.query(func.sum((cte.c.c - result['avg'])**4)))
             moment = dtof(moment.first()[0])
             result["kurtosis"] = moment / result['stddev'] ** 4
             

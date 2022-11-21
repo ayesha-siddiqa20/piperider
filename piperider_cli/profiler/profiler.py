@@ -843,12 +843,13 @@ class NumericColumnProfiler(BaseColumnProfiler):
             # kurtosis
 
             # 4th moment
-            moment4 = func.sum((cte.c.c - result['avg']) * (cte.c.c - result['avg']) * (cte.c.c - result['avg']) * (cte.c.c - result['avg']))
-            stmt = select(moment4)
+            deviation = func.cast(cte.c.c, Float) - result['avg']
+            moment = func.sum(deviation * deviation * deviation * deviation)
+            stmt = select(moment)
             result4 = conn.execute(stmt).fetchone()
-            _moment4 = result4
-            _moment4 = dtof(_moment4)
-            result["kurtosis"] = _moment4 / result['non_nulls'] * result['stddev'] ** 4
+            _moment = result4
+            _moment = dtof(_moment)
+            result["kurtosis"] = _moment / result['_total'] * result['stddev'] ** 4
             
             return result
 

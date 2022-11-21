@@ -605,6 +605,7 @@ class Runner():
         run_id = uuid.uuid4().hex
         created_at = datetime.utcnow()
         engine = ds.create_engine()
+        console.print("This is the ds name", ds)
 
         if table:
             # cli --table is specified, no inclusion and exclusion applied

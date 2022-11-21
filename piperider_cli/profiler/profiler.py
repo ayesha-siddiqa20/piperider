@@ -866,7 +866,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'avg': _avg,
                 'stddev': _stddev,
                 'mode': _mode,
-                'num_empty_values': null,
+                'num_empty_values': 'null',
             }
 
             # uniqueness
@@ -1211,7 +1211,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 'min': _min.isoformat() if _min is not None else None,
                 'max': _max.isoformat() if _max is not None else None,
                 'mode': _mode,
-                'num_empty_values': null,
+                'num_empty_values': 'null',
             }
 
             # uniqueness
@@ -1422,7 +1422,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'distinct': _distinct,
                 'distinct_p': percentage(_distinct, _valids),
                 'mode': _mode,
-                'num_empty_values': null,
+                'num_empty_values': 'null',
                 # deprecated
                 # 'distribution': {
                 #     'type': "topk",

@@ -849,7 +849,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             result4 = conn.execute(stmt).fetchone()
             _moment = result4
             _moment = dtof(_moment)
-            result["kurtosis"] = _moment / result['_total'] * result['stddev'] ** 4
+            result["kurtosis"] = _moment / result['total'] * result['stddev'] ** 4
             
             return result
 

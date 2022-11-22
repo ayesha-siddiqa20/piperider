@@ -654,13 +654,6 @@ class StringColumnProfiler(BaseColumnProfiler):
             if str(_mode) == "[None]":
                 _mode = []
 
-            if _nulls > 0 or _num_empty_values > 0:
-                _empty_null_constraint = true()
-            else:
-                _empty_null_constraint = false()
-
-
-
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
             _non_zero_length = _valids - _zero_length
@@ -672,6 +665,14 @@ class StringColumnProfiler(BaseColumnProfiler):
             _num_leading_spaces_only = dtof(_num_leading_spaces_only)
             _num_trailing_spaces_only = dtof(_num_trailing_spaces_only)
             _num_empty_values = dtof(_num_empty_values)
+
+            # code for empty_null_constraint
+
+            if _nulls > 0 or _num_empty_values > 0:
+                _empty_null_constraint = true()
+            else:
+                _empty_null_constraint = false()
+
             result = {
                 'total': None,
                 'samples': _total,
@@ -808,11 +809,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
             if str(_mode) == "[None]":
                 _mode = []
 
-            if _nulls > 0:
-                _empty_null_constraint = true()
-            else:
-                _empty_null_constraint = false()
-
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
             _positives = _valids - _zeros - _negatives
@@ -824,6 +820,13 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _min_length = dtof(_min_length)
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
+
+            # code for empty_null_constraint
+
+            if _nulls > 0:
+                _empty_null_constraint = true()
+            else:
+                _empty_null_constraint = false()
 
             result = {
                 'total': None,
@@ -1159,6 +1162,8 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             _invalids = _non_nulls - _valids
             _mode = list(chain(*(session.execute(query2))))
 
+            # code for empty_null_constraint
+
             if _nulls > 0:
                 _empty_null_constraint = true()
             else:
@@ -1375,6 +1380,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
             if str(_mode) == "[None]":
                 _mode = []
 
+            # code for empty_null_constraint
             if _nulls > 0:
                 _empty_null_constraint = true()
             else:

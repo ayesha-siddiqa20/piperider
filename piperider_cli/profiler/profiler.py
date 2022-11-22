@@ -280,13 +280,13 @@ class Profiler:
                     row_count, = conn.execute(stmt).fetchone()
 
         result['row_count'] = result['samples'] = row_count
-        result['samples_p'] = 1
+        # result['samples_p'] = 1
 
         if self.config:
             limit = self.config.profiler_config.get('table', {}).get('limit', 0)
             if row_count > limit > 0:
                 result['samples'] = limit
-                result['samples_p'] = percentage(limit, row_count)
+                # result['samples_p'] = percentage(limit, row_count)
 
         if created:
             result['created'] = created
@@ -370,12 +370,12 @@ class Profiler:
         self.event_handler.handle_table_progress(result, col_count, col_index)
 
         # Profile columns
-        samples_p = result['samples_p']
+        # samples_p = result['samples_p']
         if isinstance(self.engine.pool, SingletonThreadPool):
             for column in candidate_columns:
                 columns[column.name] = self._profile_column(table, column)
                 columns[column.name]['total'] = result['row_count']
-                columns[column.name]['samples_p'] = samples_p
+                # columns[column.name]['samples_p'] = samples_p
                 col_index = col_index + 1
                 self.event_handler.handle_table_progress(result, col_count, col_index)
             profile_end = time.perf_counter()
@@ -400,7 +400,7 @@ class Profiler:
                         else:
                             columns[column.name] = data
                             columns[column.name]['total'] = result['row_count']
-                            columns[column.name]['samples_p'] = samples_p
+                            # columns[column.name]['samples_p'] = samples_p
                             col_index = col_index + 1
                             self.event_handler.handle_table_progress(result, col_count, col_index)
                 finally:

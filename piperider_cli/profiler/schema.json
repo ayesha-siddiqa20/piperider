@@ -175,6 +175,10 @@
                       "description": "Count of records that contain blank spaces in the dataset",
                       "type": "integer"
                     },
+                    "decimal_digits": {
+                      "description": "Identifies the number of decimal digits for any given number",
+                      "type": "integer"
+                    },
                     "invalid_chars": {
                       "description": "List of values in a dataset which contains invalid alphabetical chars",
                       "type": "string"

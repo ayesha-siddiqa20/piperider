@@ -28,17 +28,6 @@ from ..configuration import Configuration
 HISTOGRAM_NUM_BUCKET = 50
 
 
-def str_sql_format(text: str) -> str:
-    """
-    str_sql_format is a helper function to change regular text form to sql approved form with ` ` in it.
-
-    text: the string that will be changed
-
-    """
-    table = text.split(".")
-    new_string = '`'+str(table[0]) + '`' +'.' + '`'+str(table[1]) + '`'
-    return new_string
-
 def dtof(value: Union[int, float, decimal.Decimal]) -> Union[int, float]:
     """
     dtof is helpler function to transform decimal value to float. Decimal is not json serializable type.
@@ -620,7 +609,7 @@ class StringColumnProfiler(BaseColumnProfiler):
 
             # code for invalid_chars
             result5 = (session.query((cte.c.c).label("_invalid_chars")).\
-                filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
+                filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  
             result5_list = list(chain(*result5))
 
             # code for num_empty_values
@@ -786,6 +775,10 @@ class NumericColumnProfiler(BaseColumnProfiler):
             query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
             query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
 
+            # code for decimal_digits
+            decimal_digits = (session.query(func.length(func.substr(func.cast(cte.c.c, String), func.instr(func.cast(cte.c.c, String), '.') + 1)).label("_decimal_digits"))).all()  
+            _decimal_digits = list(chain(*decimal_digits))
+
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.c) * func.sum(
                     func.cast(cte.c.c, Float) * func.cast(cte.c.c, Float)) - func.sum(cte.c.c) * func.sum(cte.c.c)) / (
@@ -832,6 +825,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'sum': _sum,
                 'max_length_leading_zeroes': _max_length_leading_zeroes, #new code
                 'max_length_after_trim': _max_length_after_trim,
+                'decimal_digits': _decimal_digits,
                 'min_length': _min_length,
                 'avg': _avg,
                 'stddev': _stddev,

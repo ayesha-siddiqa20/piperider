@@ -845,6 +845,10 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _moment = dtof(conn.execute(stmt).fetchone()[0])
             result["kurtosis"] = _moment / (result['samples'] * (result['stddev'] ** 4))
             
+            #new code: unique constraint
+            result["unique_check"] = (result["distinct_p"] == 1)
+
+
             return result
 
     def _profile_quantile_via_window_function(

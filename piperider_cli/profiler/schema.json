@@ -306,6 +306,17 @@
                     "quantiles": {
                       "description": "The quantile values of the dataset (5th, 25th, 50th, 75th, and 95th percentiles)",
                       "type": "number"
+                    },
+                    "unique_check": {
+                      "description": "The T/F indicator if unique values are present in a dataset",
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ]
                     }
                   }
                 }

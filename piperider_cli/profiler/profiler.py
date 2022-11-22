@@ -669,9 +669,9 @@ class StringColumnProfiler(BaseColumnProfiler):
             # code for empty_null_constraint
 
             if _nulls > 0 or _num_empty_values > 0:
-                _empty_null_constraint = true()
+                _empty_null_constraint = True
             else:
-                _empty_null_constraint = false()
+                _empty_null_constraint = False
 
             result = {
                 'total': None,
@@ -824,9 +824,9 @@ class NumericColumnProfiler(BaseColumnProfiler):
             # code for empty_null_constraint
 
             if _nulls > 0:
-                _empty_null_constraint = true()
+                _empty_null_constraint = True
             else:
-                _empty_null_constraint = false()
+                _empty_null_constraint = False
 
             result = {
                 'total': None,
@@ -1165,9 +1165,9 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             # code for empty_null_constraint
 
             if _nulls > 0:
-                _empty_null_constraint = true()
+                _empty_null_constraint = True
             else:
-                _empty_null_constraint = false()
+                _empty_null_constraint = False
 
 
             if self._get_database_backend() == 'sqlite':
@@ -1382,9 +1382,9 @@ class BooleanColumnProfiler(BaseColumnProfiler):
 
             # code for empty_null_constraint
             if _nulls > 0:
-                _empty_null_constraint = true()
+                _empty_null_constraint = True
             else:
-                _empty_null_constraint = false()
+                _empty_null_constraint = False
 
             result = {
                 'total': None,

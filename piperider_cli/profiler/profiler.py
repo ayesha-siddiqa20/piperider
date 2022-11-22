@@ -657,6 +657,9 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _invalid_chars = result5_list
                 _mode = list(chain(*(session.execute(query2))))
 
+            if None in _mode:
+                _mode = []
+
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -794,6 +797,9 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 result = conn.execute(stmt).fetchone() # new code
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _stddev = result
                 _mode = list(chain(*(session.execute(query2))))
+
+            if None in _mode:
+                _mode = []
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -998,8 +1004,8 @@ class NumericColumnProfiler(BaseColumnProfiler):
         stmt = select(selects).select_from(table)
         result = conn.execute(stmt).fetchone()
         return {
-            # 'p5': dtof(result[0]),
-            'p25': dtof(result[0]),
+            'p5': dtof(result[0]),
+            'p25': dtof(result[1]),
             'p50': dtof(result[2]),
             'p75': dtof(result[3]),
             'p95': dtof(result[4]),
@@ -1344,6 +1350,9 @@ class BooleanColumnProfiler(BaseColumnProfiler):
             _invalids = _non_nulls - _valids
             _falses = _valids - _trues
             _mode = list(chain(*(session.execute(query2))))
+
+            if None in _mode:
+                _mode = []
 
             result = {
                 'total': None,

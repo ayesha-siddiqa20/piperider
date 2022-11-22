@@ -163,6 +163,10 @@ class MetricName:
         self._add('min', 'min', ['integer', 'numeric', 'datetime'])
         self._add('max', 'max', ['integer', 'numeric', 'datetime'])
         self._add('avg', 'average', ['integer', 'numeric'])
+        # new code: Skewness
+        self._add('skew', 'skewness', ['integer', 'numeric'])
+        # new code: Kurtosis
+        self._add('kurt', 'kurtosis', ['integer', 'numeric'])
         # new code
         self._add('max_length_leading_zeroes', 'max_length_leading_zeroes', ['integer', 'numeric'])
         self._add('max_length_after_trim', 'max_length_after_trim', ['integer', 'numeric'])
@@ -184,11 +188,10 @@ class MetricName:
         self._add('non_duplicates', 'non duplicate count', ['integer', 'numeric', 'string', 'datetime'])
         self._add('empty_null_constraint', 'empty_null_constraint', ['numeric', 'integer', 'string', 'datetime'])
         self._add('min', 'min', ['integer', 'numeric'])
-        self._add('p5', '5th percentile', ['integer', 'numeric'])
-        self._add('p25', '25th percentile ', ['integer', 'numeric'])
-        self._add('p50', 'median', ['integer', 'numeric'])
-        self._add('p75', '75th percentile', ['integer', 'numeric'])
-        self._add('p95', '95th percentile', ['integer', 'numeric'])
+        # new code: quantiles
+        self._add('quantiles', '5th, 25th, 50th, 75th, and 95th percentile', ['integer', 'numeric'])
+        # new code: Unique Constraint
+        self._add('unique_check', 'unique constraint check', ['integer', 'numeric', 'string', 'datetime'])
         self._add('max', 'max', ['integer', 'numeric'])
 
 

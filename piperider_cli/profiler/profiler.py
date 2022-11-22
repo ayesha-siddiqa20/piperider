@@ -686,7 +686,6 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'avg': _avg,
                 'avg_length': _avg,
                 'stddev': _stddev,
-                'stddev_length': _stddev,
                 'num_values_with_trailing_leading_spaces': _num_values_with_trailing_leading_spaces, # new code
                 'num_leading_spaces_only': _num_leading_spaces_only,
                 'num_trailing_spaces_only': _num_trailing_spaces_only,

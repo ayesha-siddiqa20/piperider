@@ -155,22 +155,6 @@
                       "description": "The percentage of numerical values that equal zero exactly",
                       "type": "number"
                     },
-                    "negatives": {
-                      "description": "The count of numerical values that are less than zero",
-                      "type": "integer"
-                    },
-                    "negatives_p": {
-                      "description": "The percentage of numerical values that are less than zero",
-                      "type": "number"
-                    },
-                    "positives": {
-                      "description": "The count of numerical values that are more than zero",
-                      "type": "integer"
-                    },
-                    "positives_p": {
-                      "description": "The percentage of numerical values that are more than zero",
-                      "type": "number"
-                    },
                     "non_zero_length_p": {
                       "description": "The percentage of string values with non-zero lengths",
                       "type": "number"

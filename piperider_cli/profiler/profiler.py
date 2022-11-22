@@ -819,10 +819,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'zeros_p': percentage(_zeros, _total),
-                'negatives': _negatives,
-                'negatives_p': percentage(_negatives, _total),
-                'positives': _positives,
-                'positives_p': percentage(_positives, _total),
 
                 'distinct': _distinct,
                 'min': _min,

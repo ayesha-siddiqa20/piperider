@@ -161,8 +161,6 @@ class MetricName:
         self._add('samples_p', 'sample percentage')
         self._add('nulls', 'missing count')
         self._add('non_nulls', 'non null count')
-        self._add('zeros_p', 'zero percentage', ['integer', 'numeric'])
-        self._add('non_zero_length_p', 'non zero length string percentage', ['string'])
         self._add('min', 'min', ['integer', 'numeric', 'datetime'])
         self._add('max', 'max', ['integer', 'numeric', 'datetime'])
         self._add('avg', 'average', ['integer', 'numeric'])

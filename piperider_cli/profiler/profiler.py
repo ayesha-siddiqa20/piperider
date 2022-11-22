@@ -676,8 +676,6 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'samples_p': None,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
-                'non_zero_length_p': percentage(_non_zero_length, _total),
-
                 'distinct': _distinct,
                 'min': _min,
                 'min_length': _min,
@@ -818,8 +816,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'samples_p': None,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
-                'zeros_p': percentage(_zeros, _total),
-
                 'distinct': _distinct,
                 'min': _min,
                 'max': _max,

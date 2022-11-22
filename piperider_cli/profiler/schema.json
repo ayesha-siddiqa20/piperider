@@ -147,18 +147,6 @@
                       "description": "The column type definition in SQL database",
                       "type": "string"
                     },
-                    "zeros": {
-                      "description": "The count of numerical values that equal zero exactly",
-                      "type": "integer"
-                    },
-                    "zeros_p": {
-                      "description": "The percentage of numerical values that equal zero exactly",
-                      "type": "number"
-                    },
-                    "non_zero_length_p": {
-                      "description": "The percentage of string values with non-zero lengths",
-                      "type": "number"
-                    },
                     "profile_duration": {
                       "type": "string"
                     },

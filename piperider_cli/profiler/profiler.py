@@ -682,6 +682,9 @@ class StringColumnProfiler(BaseColumnProfiler):
                 "counts": topk["counts"],
             } if topk else None
 
+            #new code: unique constraint
+            result["unique_check"] = (result["distinct_p"] == 1)
+
             return result
 
 
@@ -844,10 +847,9 @@ class NumericColumnProfiler(BaseColumnProfiler):
             stmt = select(moment)
             _moment = dtof(conn.execute(stmt).fetchone()[0])
             result["kurtosis"] = _moment / (result['samples'] * (result['stddev'] ** 4))
-            
+                    
             #new code: unique constraint
             result["unique_check"] = (result["distinct_p"] == 1)
-
 
             return result
 
@@ -1165,6 +1167,9 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 "counts": histogram["counts"],
                 "bin_edges": histogram["bin_edges"],
             } if histogram else None
+            
+            #new code: unique constraint
+            result["unique_check"] = (result["distinct_p"] == 1)
 
             return result
 
@@ -1350,6 +1355,9 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                     'counts': [_falses, _trues]
                 }
             }
+            
+            #new code: unique constraint
+            result["unique_check"] = (result["distinct_p"] == 1)
 
             return result
 

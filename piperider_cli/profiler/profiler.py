@@ -778,6 +778,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 func.min(func.length(func.cast(cte.c.c, String))).label("_min_length"),
                 func.max(func.length(func.cast(cte.c.c, String))).label("_max_length"),
                 func.avg(cte.c.c).label("_avg"),
+                func.avg(func.length(func.cast(cte.c.c, String))).label("_avg_length"),
                 func.min(cte.c.c).label("_min"),
                 func.max(cte.c.c).label("_max"),
             ]
@@ -796,7 +797,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                                    (func.count(cte.c.c) - 1) * func.count(cte.c.c)).label('_variance'))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _max_length, _avg, _min, _max, _variance = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _max_length, _avg, _avg_length, _min, _max, _variance = result
                 _stddev = None
                 _mode = list(chain(*(session.execute(query2))))
 
@@ -806,7 +807,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 columns.append(func.stddev(cte.c.c).label("_stddev"))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _max_length, _avg, _min, _max, _stddev = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _max_length, _avg, _avg_length, _min, _max, _stddev = result
                 _mode = list(chain(*(session.execute(query2))))
 
             if str(_mode) == "[None]":
@@ -823,6 +824,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _min_length = dtof(_min_length)
             _max_length = dtof(_max_length)
             _avg = dtof(_avg)
+            _avg_length = dtof(_avg_length)
             _stddev = dtof(_stddev)
 
             # code for empty_null_constraint
@@ -847,6 +849,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'max_length_after_trim': _max_length_after_trim,
                 'decimal_digits': _decimal_digits,
                 'avg': _avg,
+                'avg_length': _avg_length,
                 'stddev': _stddev,
                 'mode': _mode,
                 'empty_null_constraint': _empty_null_constraint,

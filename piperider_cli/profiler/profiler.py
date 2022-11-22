@@ -658,9 +658,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _invalid_chars = result5_list
                 _mode = list(chain(*(session.execute(query2))))
 
-            value_of_mode = _mode
-            print(value_of_mode)
-            if str(_mode) == "[null]":
+            if str(_mode) == "[None]":
                 _mode = []
 
 
@@ -801,7 +799,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _stddev = result
                 _mode = list(chain(*(session.execute(query2))))
 
-            if str(_mode) == "[null]":
+            if str(_mode) == "[None]":
                 _mode = []
 
 
@@ -1355,7 +1353,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
             _falses = _valids - _trues
             _mode = list(chain(*(session.execute(query2))))
 
-            if str(_mode) == "[null]":
+            if str(_mode) == "[None]":
                 _mode = []
 
 

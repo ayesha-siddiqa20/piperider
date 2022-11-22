@@ -1360,10 +1360,6 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'samples_p': None,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
-                'trues': _trues,
-                'trues_p': percentage(_trues, _total),
-                'falses': _falses,
-                'falses_p': percentage(_falses, _total),
                 'distinct': _distinct,
                 'mode': _mode,
 

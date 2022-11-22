@@ -159,22 +159,6 @@
                       "description": "The percentage of string values with non-zero lengths",
                       "type": "number"
                     },
-                    "trues": {
-                      "description": "The count of boolean true values",
-                      "type": "integer"
-                    },
-                    "trues_p": {
-                      "description": "The percentage of boolean true values",
-                      "type": "number"
-                    },
-                    "falses": {
-                      "description": "The count of boolean false values",
-                      "type": "integer"
-                    },
-                    "falses_p": {
-                      "description": "The percentage of boolean false values",
-                      "type": "number"
-                    },
                     "profile_duration": {
                       "type": "string"
                     },

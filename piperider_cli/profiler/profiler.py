@@ -678,6 +678,9 @@ class StringColumnProfiler(BaseColumnProfiler):
                 "labels": topk["values"],
                 "counts": topk["counts"],
             } if topk else None
+            
+            #new code: unique constraint
+            result["unique_check"] = (result["distinct_p"] == 1)
 
             return result
 
@@ -803,16 +806,13 @@ class NumericColumnProfiler(BaseColumnProfiler):
             result['histogram'] = histogram
 
             # quantile
+            # new code: modifying quantiles to get them into a single list
             quantile = {}
             if _valids > 0:
                 quantile = self._profile_quantile(conn, cte, cte.c.c, _valids)
-            result.update({
-                'p5': quantile.get('p5'),
-                'p25': quantile.get('p25'),
-                'p50': quantile.get('p50'),
-                'p75': quantile.get('p75'),
-                'p95': quantile.get('p95'),
-            })
+            _quantiles = [quantile.get('p5'), quantile.get('p25'), quantile.get('p50'), quantile.get('p75'), quantile.get('p95')]
+            result["quantiles"] = _quantiles
+
 
             # top k (integer only)
             if self.is_integer:
@@ -828,6 +828,21 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 "counts": histogram["counts"],
                 "bin_edges": histogram["bin_edges"],
             } if histogram else None
+
+            # new code: skewness
+            result["skewness"] = (3 * (result['avg'] - result["quantiles"][2]) / result['stddev'])
+            
+            # new code: kurtosis
+
+            # 4th moment
+            deviation = func.cast(cte.c.c, Float) - result['avg']
+            moment = func.sum(deviation * deviation * deviation * deviation)
+            stmt = select(moment)
+            _moment = dtof(conn.execute(stmt).fetchone()[0])
+            result["kurtosis"] = _moment / (result['samples'] * (result['stddev'] ** 4))
+                    
+            #new code: unique constraint
+            result["unique_check"] = (result["distinct_p"] == 1)
 
             return result
 
@@ -1146,6 +1161,9 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 "bin_edges": histogram["bin_edges"],
             } if histogram else None
 
+            #new code: unique constraint
+            result["unique_check"] = (result["distinct_p"] == 1)
+
             return result
 
     def _profile_histogram(
@@ -1330,6 +1348,9 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                     'counts': [_falses, _trues]
                 }
             }
+
+            #new code: unique constraint
+            result["unique_check"] = (result["distinct_p"] == 1)
 
             return result
 

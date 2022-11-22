@@ -269,6 +269,14 @@
                       "description": "The standard deviation of text length of a string column",
                       "type": "number"
                     },
+                    "skew": {
+                      "description": "A statistical measure used to describe data distribution. It identifies the measure of asymmetry in the distribution of a data set",
+                      "type": "number"
+                    },
+                    "kurt": {
+                      "description": "A statistical measure used to describe data distribution. It identifies the measure of variance in the data set",
+                      "type": "number"
+                    },
                     "min": {
                       "description": "The minimum value of a column's range",
                       "oneOf": [
@@ -299,25 +307,20 @@
                       "description": "The maximum length of a string column",
                       "type": "integer"
                     },
-                    "p5": {
-                      "description": "The quantile value of the dataset (5th percentile)",
+                    "quantiles": {
+                      "description": "The quantile values of the dataset (5th, 25th, 50th, 75th, and 95th percentiles)",
                       "type": "number"
                     },
-                    "p25": {
-                      "description": "The quantile value of the dataset (25th percentile)",
-                      "type": "number"
-                    },
-                    "p50": {
-                      "description": "The quantile value of the dataset (50th percentile)",
-                      "type": "number"
-                    },
-                    "p75": {
-                      "description": "The quantile value of the dataset (75th percentile)",
-                      "type": "number"
-                    },
-                    "p95": {
-                      "description": "The quantile value of the dataset (95th percentile)",
-                      "type": "number"
+                    "unique_check": {
+                      "description": "The T/F indicator if unique values are present in a dataset",
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ]
                     }
                   }
                 }

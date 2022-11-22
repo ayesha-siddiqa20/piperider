@@ -88,10 +88,6 @@
                       "description": "Number of rows after applying the row-limit configuration (rows will be unaffected if none is set",
                       "type": "integer"
                     },
-                    "samples_p": {
-                      "description": "Percentage of rows after applying the row-limit configuration (rows will be unaffected if none is set",
-                      "type": "number"
-                    },
                     "nulls": {
                       "description": "The count of values that are null type",
                       "type": "integer"

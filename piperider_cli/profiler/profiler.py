@@ -351,7 +351,6 @@ class Profiler:
             "name": table.name,
             "row_count": 0,
             "samples": 0,
-            "samples_p": None,
             "col_count": col_count,
             "duplicate_rows": None,
             "duplicate_rows_p": None,
@@ -554,7 +553,6 @@ class BaseColumnProfiler:
             return {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distribution': None,
@@ -673,7 +671,6 @@ class StringColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
@@ -813,7 +810,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
@@ -1154,7 +1150,6 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
@@ -1353,7 +1348,6 @@ class BooleanColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,

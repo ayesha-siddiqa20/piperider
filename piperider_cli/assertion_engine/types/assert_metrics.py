@@ -158,7 +158,6 @@ class MetricName:
 
         self._add('total', 'row count')
         self._add('samples', 'sample count')
-        self._add('samples_p', 'sample percentage')
         self._add('nulls', 'missing count')
         self._add('non_nulls', 'non null count')
         self._add('min', 'min', ['integer', 'numeric', 'datetime'])

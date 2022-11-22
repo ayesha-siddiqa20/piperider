@@ -826,6 +826,10 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _avg = dtof(_avg)
             _avg_length = dtof(_avg_length)
             _stddev = dtof(_stddev)
+            quantile = {}
+            if _valids > 0:
+                quantile = self._profile_quantile(conn, cte, cte.c.c, _valids)
+            _median = dtof(quantile.get('p50'))
 
             # code for empty_null_constraint
 
@@ -851,6 +855,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'avg': _avg,
                 'avg_length': _avg_length,
                 'stddev': _stddev,
+                'median': _median,
                 'mode': _mode,
                 'empty_null_constraint': _empty_null_constraint,
 
@@ -872,9 +877,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
 
             # quantile
             # new code: modifying quantiles to get them into a single list
-            quantile = {}
-            if _valids > 0:
-                quantile = self._profile_quantile(conn, cte, cte.c.c, _valids)
             _quantiles = [quantile.get('p5'), quantile.get('p25'), quantile.get('p50'), quantile.get('p75'), quantile.get('p95')]
             result["quantiles"] = _quantiles
 

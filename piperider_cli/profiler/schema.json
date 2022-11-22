@@ -183,6 +183,10 @@
                       "description": "List of values in a dataset which contains invalid alphabetical chars",
                       "type": "string"
                     },
+                    "empty_null_constraint": {
+                      "description": "Provides True/False indicator if empty or null values are present in dataset",
+                      "type": "boolean"
+                    },
                     "avg": {
                       "description": "The average of a column's values",
                       "type": "number"

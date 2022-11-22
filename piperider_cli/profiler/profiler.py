@@ -654,6 +654,12 @@ class StringColumnProfiler(BaseColumnProfiler):
             if str(_mode) == "[None]":
                 _mode = []
 
+            if _nulls > 0 or _num_empty_values > 0:
+                _empty_null_constraint = true()
+            else:
+                _empty_null_constraint = false()
+
+
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -686,6 +692,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'num_empty_values': _num_empty_values,
                 'invalid_chars': _invalid_chars,
                 'mode': _mode,
+                'empty_null_constraint': _empty_null_constraint,
 
             }
 
@@ -801,6 +808,10 @@ class NumericColumnProfiler(BaseColumnProfiler):
             if str(_mode) == "[None]":
                 _mode = []
 
+            if _nulls > 0:
+                _empty_null_constraint = true()
+            else:
+                _empty_null_constraint = false()
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -830,6 +841,8 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'avg': _avg,
                 'stddev': _stddev,
                 'mode': _mode,
+                'empty_null_constraint': _empty_null_constraint,
+
             }
 
             # uniqueness
@@ -1146,6 +1159,11 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             _invalids = _non_nulls - _valids
             _mode = list(chain(*(session.execute(query2))))
 
+            if _nulls > 0:
+                _empty_null_constraint = true()
+            else:
+                _empty_null_constraint = false()
+
 
             if self._get_database_backend() == 'sqlite':
                 if isinstance(self.column.type, Date):
@@ -1163,6 +1181,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 'distinct': _distinct,
                 'min': _min.isoformat() if _min is not None else None,
                 'max': _max.isoformat() if _max is not None else None,
+                'empty_null_constraint': _empty_null_constraint,
                 'mode': _mode,
             }
 
@@ -1356,6 +1375,10 @@ class BooleanColumnProfiler(BaseColumnProfiler):
             if str(_mode) == "[None]":
                 _mode = []
 
+            if _nulls > 0:
+                _empty_null_constraint = true()
+            else:
+                _empty_null_constraint = false()
 
             result = {
                 'total': None,
@@ -1364,6 +1387,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'nulls': _nulls,
                 'distinct': _distinct,
                 'mode': _mode,
+                'empty_null_constraint': _empty_null_constraint,
 
                 # deprecated
                 # 'distribution': {

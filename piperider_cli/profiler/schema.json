@@ -207,10 +207,6 @@
                       "description": "The percentage of numerical values that are more than zero",
                       "type": "number"
                     },
-                    "zero_length": {
-                      "description": "The count of string values with zero lengths exactly",
-                      "type": "integer"
-                    },
                     "zero_length_p": {
                       "description": "The percentage of string values with zero lengths exactly",
                       "type": "number"

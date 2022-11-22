@@ -688,7 +688,6 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'valids_p': percentage(_valids, _total),
                 'invalids': _invalids,
                 'invalids_p': percentage(_invalids, _total),
-                'zero_length': _zero_length,
                 'zero_length_p': percentage(_zero_length, _total),
                 'non_zero_length': _non_zero_length,
                 'non_zero_length_p': percentage(_non_zero_length, _total),

@@ -172,8 +172,6 @@ class MetricName:
         self._add('negatives_p', 'negative value percentage', ['integer', 'numeric'])
         self._add('positives', 'positive value count', ['integer', 'numeric'])
         self._add('positives_p', 'positive value percentage', ['integer', 'numeric'])
-        self._add('zero_length', 'zero length string count', ['string'])
-        self._add('zero_length_p', 'zero length string percentage', ['string'])
         self._add('non_zero_length', 'non zero length string count', ['string'])
         self._add('non_zero_length_p', 'non zero length string percentage', ['string'])
         self._add('trues', 'true count', ['boolean'])

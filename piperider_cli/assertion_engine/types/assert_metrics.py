@@ -204,7 +204,7 @@ class MetricName:
         # new code: quantiles
         self._add('quantiles', '5th, 25th, 50th, 75th, and 95th percentile', ['integer', 'numeric'])
         # new code: Unique Constraint
-        self._add('unique_check', 'unique constraint check', ['integer', 'numeric'])
+        self._add('unique_check', 'unique constraint check', ['integer', 'numeric', 'string', 'datetime'])
         self._add('max', 'max', ['integer', 'numeric'])
 
 

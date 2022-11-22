@@ -659,6 +659,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _mode = list(chain(*(session.execute(query2))))
 
             value_of_mode = _mode
+            print(value_of_mode)
             if str(_mode) == "[null]":
                 _mode = []
 

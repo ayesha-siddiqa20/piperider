@@ -183,10 +183,6 @@
                       "description": "The percentage of values that don't match the schema type. For example, a string in a numeric column.",
                       "type": "number"
                     },
-                    "zeros": {
-                      "description": "The count of numerical values that equal zero exactly",
-                      "type": "integer"
-                    },
                     "zeros_p": {
                       "description": "The percentage of numerical values that equal zero exactly",
                       "type": "number"

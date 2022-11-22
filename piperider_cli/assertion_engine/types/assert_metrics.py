@@ -1,3 +1,5 @@
+# assert metrics
+
 from datetime import datetime
 from typing import Union, List
 
@@ -148,37 +150,16 @@ class MetricName:
         self.all_type = 'ALL'
 
         # table metric
-        self._add('row_count', 'row count')
-        self._add('bytes', 'volume size')
-        self._add('freshness', 'freshness')
+        # self._add('row_count', 'row count')
+        # self._add('bytes', 'volume size')
+        # self._add('freshness', 'freshness')
         self._add('duplicate_rows', 'duplicate row count')
         self._add('duplicate_rows_p', 'duplicate row percentage')
 
         self._add('total', 'row count')
         self._add('samples', 'sample count')
-        self._add('samples_p', 'sample percentage')
         self._add('nulls', 'missing count')
-        self._add('nulls_p', 'missing percentage')
         self._add('non_nulls', 'non null count')
-        self._add('non_nulls_p', 'non null percentage')
-        self._add('invalids', 'invalid count')
-        self._add('invalids_p', 'invalid percentage')
-        self._add('valids', 'valid count')
-        self._add('valids_p', 'valid percentage')
-        self._add('zeros', 'zero count', ['integer', 'numeric'])
-        self._add('zeros_p', 'zero percentage', ['integer', 'numeric'])
-        self._add('negatives', 'negative value count', ['integer', 'numeric'])
-        self._add('negatives_p', 'negative value percentage', ['integer', 'numeric'])
-        self._add('positives', 'positive value count', ['integer', 'numeric'])
-        self._add('positives_p', 'positive value percentage', ['integer', 'numeric'])
-        self._add('zero_length', 'zero length string count', ['string'])
-        self._add('zero_length_p', 'zero length string percentage', ['string'])
-        self._add('non_zero_length', 'non zero length string count', ['string'])
-        self._add('non_zero_length_p', 'non zero length string percentage', ['string'])
-        self._add('trues', 'true count', ['boolean'])
-        self._add('trues_p', 'true percentage', ['boolean'])
-        self._add('falses', 'false count', ['boolean'])
-        self._add('falses_p', 'false percentage', ['boolean'])
         self._add('min', 'min', ['integer', 'numeric', 'datetime'])
         self._add('max', 'max', ['integer', 'numeric', 'datetime'])
         self._add('avg', 'average', ['integer', 'numeric'])
@@ -189,6 +170,8 @@ class MetricName:
         # new code
         self._add('max_length_leading_zeroes', 'max_length_leading_zeroes', ['integer', 'numeric'])
         self._add('max_length_after_trim', 'max_length_after_trim', ['integer', 'numeric'])
+        self._add('num_empty_values', 'num_empty_values', ['string'])
+        self._add('decimal_digits', 'decimal_digits', ['numeric', 'integer'])
         self._add('mode', 'mode', ['integer', 'numeric', 'string'])
         self._add('sum', 'sum', ['integer', 'numeric'])
         self._add('stddev', 'standard deviation', ['integer', 'numeric'])
@@ -201,11 +184,9 @@ class MetricName:
         self._add('num_trailing_spaces_only', 'num_trailing_spaces_only', ['string'])
         self._add('invalid_chars', 'invalid_chars', ['string'])
         self._add('distinct', 'distinct count', ['integer', 'string', 'datetime'])
-        self._add('distinct_p', 'distinct percentage', ['integer', 'string', 'datetime'])
         self._add('duplicates', 'duplicate count', ['integer', 'numeric', 'string', 'datetime'])
-        self._add('duplicates_p', 'duplicate percentage', ['integer', 'numeric', 'string', 'datetime'])
         self._add('non_duplicates', 'non duplicate count', ['integer', 'numeric', 'string', 'datetime'])
-        self._add('non_duplicates_p', 'non duplicate percentage', ['integer', 'numeric', 'string', 'datetime'])
+        self._add('empty_null_constraint', 'empty_null_constraint', ['numeric', 'integer', 'string', 'datetime'])
         self._add('min', 'min', ['integer', 'numeric'])
         # new code: quantiles
         self._add('quantiles', '5th, 25th, 50th, 75th, and 95th percentile', ['integer', 'numeric'])

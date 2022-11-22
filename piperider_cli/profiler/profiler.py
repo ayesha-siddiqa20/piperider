@@ -27,18 +27,6 @@ from ..configuration import Configuration
 
 HISTOGRAM_NUM_BUCKET = 50
 
-number_print = 0
-
-def str_sql_format(text: str) -> str:
-    """
-    str_sql_format is a helper function to change regular text form to sql approved form with ` ` in it.
-
-    text: the string that will be changed
-
-    """
-    table = text.split(".")
-    new_string = '`'+str(table[0]) + '`' +'.' + '`'+str(table[1]) + '`'
-    return new_string
 
 def dtof(value: Union[int, float, decimal.Decimal]) -> Union[int, float]:
     """
@@ -280,13 +268,13 @@ class Profiler:
                     row_count, = conn.execute(stmt).fetchone()
 
         result['row_count'] = result['samples'] = row_count
-        result['samples_p'] = 1
+        # result['samples_p'] = 1
 
         if self.config:
             limit = self.config.profiler_config.get('table', {}).get('limit', 0)
             if row_count > limit > 0:
                 result['samples'] = limit
-                result['samples_p'] = percentage(limit, row_count)
+                # result['samples_p'] = percentage(limit, row_count)
 
         if created:
             result['created'] = created
@@ -351,7 +339,6 @@ class Profiler:
             "name": table.name,
             "row_count": 0,
             "samples": 0,
-            "samples_p": None,
             "col_count": col_count,
             "duplicate_rows": None,
             "duplicate_rows_p": None,
@@ -366,23 +353,23 @@ class Profiler:
         profile_start = time.perf_counter()
 
         # Profile table metrics
-        self._profile_table_metadata(result, table)
+        # self._profile_table_metadata(result, table)
         self._profile_table_duplicate_rows(result, table)
         self.event_handler.handle_table_progress(result, col_count, col_index)
 
         # Profile columns
-        samples_p = result['samples_p']
+        # samples_p = result['samples_p']
         if isinstance(self.engine.pool, SingletonThreadPool):
             for column in candidate_columns:
                 columns[column.name] = self._profile_column(table, column)
                 columns[column.name]['total'] = result['row_count']
-                columns[column.name]['samples_p'] = samples_p
+                # columns[column.name]['samples_p'] = samples_p
                 col_index = col_index + 1
                 self.event_handler.handle_table_progress(result, col_count, col_index)
             profile_end = time.perf_counter()
             duration = profile_end - profile_start
-            result["profile_duration"] = f"{duration:.2f}"
-            result["elapsed_milli"] = int(duration * 1000)
+            # result["profile_duration"] = f"{duration:.2f}"
+            # result["elapsed_milli"] = int(duration * 1000)
 
             self.event_handler.handle_table_end(result)
         else:
@@ -401,14 +388,14 @@ class Profiler:
                         else:
                             columns[column.name] = data
                             columns[column.name]['total'] = result['row_count']
-                            columns[column.name]['samples_p'] = samples_p
+                            # columns[column.name]['samples_p'] = samples_p
                             col_index = col_index + 1
                             self.event_handler.handle_table_progress(result, col_count, col_index)
                 finally:
                     profile_end = time.perf_counter()
                     duration = profile_end - profile_start
-                    result["profile_duration"] = f"{duration:.2f}"
-                    result["elapsed_milli"] = int(duration * 1000)
+                    # result["profile_duration"] = f"{duration:.2f}"
+                    # result["elapsed_milli"] = int(duration * 1000)
 
                     self.event_handler.handle_table_end(result)
 
@@ -464,8 +451,8 @@ class Profiler:
         duration = profile_end - profile_start
 
         result.update(profile_result)
-        result["profile_duration"] = f"{duration:.2f}"
-        result["elapsed_milli"] = int(duration * 1000)
+        # result["profile_duration"] = f"{duration:.2f}"
+        # result["elapsed_milli"] = int(duration * 1000)
 
         self.event_handler.handle_column_end(table.name, result)
 
@@ -554,15 +541,8 @@ class BaseColumnProfiler:
             return {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valid,
-                'valids_p': percentage(_valid, _total),
-                'invalids': 0,
-                'invalids_p': 0,
                 'distribution': None,
             }
 
@@ -629,8 +609,14 @@ class StringColumnProfiler(BaseColumnProfiler):
 
             # code for invalid_chars
             result5 = (session.query((cte.c.c).label("_invalid_chars")).\
-                filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
+                filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  
             result5_list = list(chain(*result5))
+
+            # code for num_empty_values
+
+            result6 = (session.query(func.count(cte.c.c).label("_num_empty_values")).\
+                filter(and_(func.REGEXP_CONTAINS(cte.c.c, '[\s]+'), ~func.REGEXP_CONTAINS(cte.c.c, '[^\s]+'))))
+            _num_empty_values = session.execute(result6).first()[0]
 
             # code for mode
             t1, c1 = self._get_limited_table_cte()
@@ -665,6 +651,8 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _invalid_chars = result5_list
                 _mode = list(chain(*(session.execute(query2))))
 
+            if str(_mode) == "[None]":
+                _mode = []
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -676,28 +664,24 @@ class StringColumnProfiler(BaseColumnProfiler):
             _num_values_with_trailing_leading_spaces = dtof(_num_values_with_trailing_leading_spaces) # new code
             _num_leading_spaces_only = dtof(_num_leading_spaces_only)
             _num_trailing_spaces_only = dtof(_num_trailing_spaces_only)
+            _num_empty_values = dtof(_num_empty_values)
+
+            # code for empty_null_constraint
+
+            if _nulls > 0 or _num_empty_values > 0:
+                _empty_null_constraint = True
+            else:
+                _empty_null_constraint = False
+
             result = {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valids,
-                'valids_p': percentage(_valids, _total),
-                'invalids': _invalids,
-                'invalids_p': percentage(_invalids, _total),
-                'zero_length': _zero_length,
-                'zero_length_p': percentage(_zero_length, _total),
-                'non_zero_length': _non_zero_length,
-                'non_zero_length_p': percentage(_non_zero_length, _total),
-
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'min': _min,
-                'min_length': _min,
                 'max': _max,
+                'min_length': _min,
                 'max_length': _max,
                 'avg': _avg,
                 'avg_length': _avg,
@@ -706,8 +690,10 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'num_values_with_trailing_leading_spaces': _num_values_with_trailing_leading_spaces, # new code
                 'num_leading_spaces_only': _num_leading_spaces_only,
                 'num_trailing_spaces_only': _num_trailing_spaces_only,
+                'num_empty_values': _num_empty_values,
                 'invalid_chars': _invalid_chars,
                 'mode': _mode,
+                'empty_null_constraint': _empty_null_constraint,
 
             }
 
@@ -716,34 +702,31 @@ class StringColumnProfiler(BaseColumnProfiler):
             _duplicates = _valids - _non_duplicates
             result.update({
                 "duplicates": _duplicates,
-                "duplicates_p": percentage(_duplicates, _valids),
                 "non_duplicates": _non_duplicates,
-                "non_duplicates_p": percentage(_non_duplicates, _valids),
             })
 
             # top k
-            topk = None
-            if _valids > 0:
-                topk = profile_topk(conn, cte.c.c)
-            result['topk'] = topk
+            # topk = None
+            # if _valids > 0:
+            #     topk = profile_topk(conn, cte.c.c)
+            # result['topk'] = topk
 
             # histogram of string length
-            histogram = None
-            if _valids > 0:
-                histogram = profile_histogram(conn, cte, cte.c.len, _min, _max, True)
-            result['histogram'] = histogram
-            result['histogram_length'] = histogram
+            # histogram = None
+            # if _valids > 0:
+            #     histogram = profile_histogram(conn, cte, cte.c.len, _min, _max, True)
+            # result['histogram'] = histogram
+            # result['histogram_length'] = histogram
 
-            # deprecated
-            result['distribution'] = {
-                "type": "topk",
-                "labels": topk["values"],
-                "counts": topk["counts"],
-            } if topk else None
+            # # deprecated
+            # result['distribution'] = {
+            #     "type": "topk",
+            #     "labels": topk["values"],
+            #     "counts": topk["counts"],
+            # } if topk else None
             
             #new code: unique constraint
             result["unique_check"] = (result["distinct_p"] == 1)
-
             return result
 
 
@@ -793,6 +776,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 func.max(func.length(func.ltrim(func.cast(cte.c.c, String), '0'))).label("_max_length_leading_zeroes"),
                 func.max(func.length(func.replace(func.ltrim(func.replace(func.cast(cte.c.c, String), '0', ' ')), ' ', '0'))).label("_max_length_after_trim"),
                 func.min(func.length(func.cast(cte.c.c, String))).label("_min_length"),
+                func.max(func.length(func.cast(cte.c.c, String))).label("_max_length"),
                 func.avg(cte.c.c).label("_avg"),
                 func.min(cte.c.c).label("_min"),
                 func.max(cte.c.c).label("_max"),
@@ -802,13 +786,17 @@ class NumericColumnProfiler(BaseColumnProfiler):
             query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
             query2 = select((query1.c.item).label("_mode")).where(query1.c.cnt.in_(select(func.max(query1.c.cnt))))
 
+            # code for decimal_digits
+            decimal_digits = (session.query(func.length(func.substr(func.cast(cte.c.c, String), func.instr(func.cast(cte.c.c, String), '.') + 1)).label("_decimal_digits"))).all()  
+            _decimal_digits = list(chain(*decimal_digits))
+
             if self._get_database_backend() == 'sqlite':
                 columns.append((func.count(cte.c.c) * func.sum(
                     func.cast(cte.c.c, Float) * func.cast(cte.c.c, Float)) - func.sum(cte.c.c) * func.sum(cte.c.c)) / (
                                    (func.count(cte.c.c) - 1) * func.count(cte.c.c)).label('_variance'))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _variance = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _max_length, _avg, _min, _max, _variance = result
                 _stddev = None
                 _mode = list(chain(*(session.execute(query2))))
 
@@ -818,8 +806,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 columns.append(func.stddev(cte.c.c).label("_stddev"))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _stddev = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _max_length, _avg, _min, _max, _stddev = result
                 _mode = list(chain(*(session.execute(query2))))
+
+            if str(_mode) == "[None]":
+                _mode = []
 
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
@@ -830,39 +821,36 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _max_length_leading_zeroes = dtof(_max_length_leading_zeroes) # new code
             _max_length_after_trim = dtof(_max_length_after_trim)
             _min_length = dtof(_min_length)
+            _max_length = dtof(_max_length)
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
+
+            # code for empty_null_constraint
+
+            if _nulls > 0:
+                _empty_null_constraint = True
+            else:
+                _empty_null_constraint = False
 
             result = {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valids,
-                'valids_p': percentage(_valids, _total),
-                'invalids': _invalids,
-                'invalids_p': percentage(_invalids, _total),
-                'zeros': _zeros,
-                'zeros_p': percentage(_zeros, _total),
-                'negatives': _negatives,
-                'negatives_p': percentage(_negatives, _total),
-                'positives': _positives,
-                'positives_p': percentage(_positives, _total),
-
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'min': _min,
                 'max': _max,
+                'min_length': _min_length,
+                'max_length': _max_length,
                 'sum': _sum,
                 'max_length_leading_zeroes': _max_length_leading_zeroes, #new code
                 'max_length_after_trim': _max_length_after_trim,
-                'min_length': _min_length,
+                'decimal_digits': _decimal_digits,
                 'avg': _avg,
                 'stddev': _stddev,
                 'mode': _mode,
+                'empty_null_constraint': _empty_null_constraint,
+
             }
 
             # uniqueness
@@ -870,16 +858,14 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _duplicates = _valids - _non_duplicates
             result.update({
                 "duplicates": _duplicates,
-                "duplicates_p": percentage(_duplicates, _valids),
                 "non_duplicates": _non_duplicates,
-                "non_duplicates_p": percentage(_non_duplicates, _valids),
             })
 
             # histogram
-            histogram = None
-            if _valids > 0:
-                histogram = profile_histogram(conn, cte, cte.c.c, _min, _max, self.is_integer)
-            result['histogram'] = histogram
+            # histogram = None
+            # if _valids > 0:
+            #     histogram = profile_histogram(conn, cte, cte.c.c, _min, _max, self.is_integer)
+            # result['histogram'] = histogram
 
             # quantile
             # new code: modifying quantiles to get them into a single list
@@ -890,20 +876,20 @@ class NumericColumnProfiler(BaseColumnProfiler):
             result["quantiles"] = _quantiles
 
 
-            # top k (integer only)
-            if self.is_integer:
-                topk = None
-                if _valids > 0:
-                    topk = profile_topk(conn, cte.c.c)
-                result["topk"] = topk
+            # # top k (integer only)
+            # if self.is_integer:
+            #     topk = None
+            #     if _valids > 0:
+            #         topk = profile_topk(conn, cte.c.c)
+            #     result["topk"] = topk
 
             # deprecated
-            result["distribution"] = {
-                "type": "histogram",
-                "labels": histogram["labels"],
-                "counts": histogram["counts"],
-                "bin_edges": histogram["bin_edges"],
-            } if histogram else None
+            # result["distribution"] = {
+            #     "type": "histogram",
+            #     "labels": histogram["labels"],
+            #     "counts": histogram["counts"],
+            #     "bin_edges": histogram["bin_edges"],
+            # } if histogram else None
 
             # new code: skewness
             result["skewness"] = (3 * (result['avg'] - result["quantiles"][2]) / result['stddev'])
@@ -1021,7 +1007,8 @@ class NumericColumnProfiler(BaseColumnProfiler):
         elif self._get_database_backend() == 'duckdb':
             selects = [
                 func.approx_quantile(column, literal_column(f"{percentile}")) for percentile in
-                [0.05, 0.25, 0.5, 0.75, 0.95]
+                [0.25]
+                #[0.05, 0.25, 0.5, 0.75, 0.95]
             ]
         elif self._get_database_backend() == 'bigquery':
             # BigQuery does not support WITHIN, change to use over
@@ -1046,7 +1033,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             #     percentile_disc(0.95) within group (order by column)
             # from table
             selects = [
-                func.percentile_disc(percentile).within_group(column) for percentile in [0.05, 0.25, 0.5, 0.75, 0.95]
+                func.percentile_disc(percentile).within_group(column) for percentile in [0.25]#[0.05, 0.25, 0.5, 0.75, 0.95]
             ]
 
         stmt = select(selects).select_from(table)
@@ -1192,6 +1179,13 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             _invalids = _non_nulls - _valids
             _mode = list(chain(*(session.execute(query2))))
 
+            # code for empty_null_constraint
+
+            if _nulls > 0:
+                _empty_null_constraint = True
+            else:
+                _empty_null_constraint = False
+
 
             if self._get_database_backend() == 'sqlite':
                 if isinstance(self.column.type, Date):
@@ -1204,19 +1198,12 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valids,
-                'valids_p': percentage(_valids, _total),
-                'invalids': _invalids,
-                'invalids_p': percentage(_invalids, _total),
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'min': _min.isoformat() if _min is not None else None,
                 'max': _max.isoformat() if _max is not None else None,
+                'empty_null_constraint': _empty_null_constraint,
                 'mode': _mode,
             }
 
@@ -1225,25 +1212,23 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             _duplicates = _valids - _non_duplicates
             result.update({
                 "duplicates": _duplicates,
-                "duplicates_p": percentage(_duplicates, _valids),
                 "non_duplicates": _non_duplicates,
-                "non_duplicates_p": percentage(_non_duplicates, _valids),
             })
 
             # histogram
-            histogram = None
-            _type = None
-            if _min and _max:
-                histogram, _type = self._profile_histogram(conn, cte, cte.c.c, _min, _max)
-            result['histogram'] = histogram
+            # histogram = None
+            # _type = None
+            # if _min and _max:
+            #     histogram, _type = self._profile_histogram(conn, cte, cte.c.c, _min, _max)
+            # result['histogram'] = histogram
 
-            # deprecated
-            result["distribution"] = {
-                "type": _type,
-                "labels": histogram["labels"],
-                "counts": histogram["counts"],
-                "bin_edges": histogram["bin_edges"],
-            } if histogram else None
+            # # deprecated
+            # result["distribution"] = {
+            #     "type": _type,
+            #     "labels": histogram["labels"],
+            #     "counts": histogram["counts"],
+            #     "bin_edges": histogram["bin_edges"],
+            # } if histogram else None
 
             #new code: unique constraint
             result["unique_check"] = (result["distinct_p"] == 1)
@@ -1412,32 +1397,30 @@ class BooleanColumnProfiler(BaseColumnProfiler):
             _falses = _valids - _trues
             _mode = list(chain(*(session.execute(query2))))
 
+            if str(_mode) == "[None]":
+                _mode = []
+
+            # code for empty_null_constraint
+            if _nulls > 0:
+                _empty_null_constraint = True
+            else:
+                _empty_null_constraint = False
+
             result = {
                 'total': None,
                 'samples': _total,
-                'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
-                'nulls_p': percentage(_nulls, _total),
-                'valids': _valids,
-                'valids_p': percentage(_valids, _total),
-                'invalids': _invalids,
-                'invalids_p': percentage(_invalids, _total),
-                'trues': _trues,
-                'trues_p': percentage(_trues, _total),
-                'falses': _falses,
-                'falses_p': percentage(_falses, _total),
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'mode': _mode,
+                'empty_null_constraint': _empty_null_constraint,
 
                 # deprecated
-                'distribution': {
-                    'type': "topk",
-                    'labels': ["False", "True"],
-                    'counts': [_falses, _trues]
-                }
+                # 'distribution': {
+                #     'type': "topk",
+                #     'labels': ["False", "True"],
+                #     'counts': [_falses, _trues]
+                # }
             }
 
             #new code: unique constraint

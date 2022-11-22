@@ -88,49 +88,25 @@
                       "description": "Number of rows after applying the row-limit configuration (rows will be unaffected if none is set",
                       "type": "integer"
                     },
-                    "samples_p": {
-                      "description": "Percentage of rows after applying the row-limit configuration (rows will be unaffected if none is set",
-                      "type": "number"
-                    },
                     "nulls": {
                       "description": "The count of values that are null type",
                       "type": "integer"
-                    },
-                    "nulls_p": {
-                      "description": "The percentage of values that are null type",
-                      "type": "number"
                     },
                     "non_nulls": {
                       "description": "The count of non null values",
                       "type": "integer"
                     },
-                    "non_nulls_p": {
-                      "description": "The percentage of non null values",
-                      "type": "number"
-                    },
                     "distinct": {
                       "description": "The count of distinct kinds of values (e.g. [a,b,c,c] => [a,b,c])",
                       "type": "integer"
-                    },
-                    "distinct_p": {
-                      "description": "The percentage of distinct kinds of values (e.g. [a,b,c,c] => [a,b,c])",
-                      "type": "number"
                     },
                     "duplicates": {
                       "description": "The count of values that are recurring (e.g. [a,b,c,c] => [c,c])",
                       "type": "integer"
                     },
-                    "duplicates_p": {
-                      "description": "The percentage of values that are recurring (e.g. [a,b,c,c] => [c,c])",
-                      "type": "number"
-                    },
                     "non_duplicates": {
                       "description": "The count of values that are non-recurring (e.g. [a,b,c,c] => [a,b])",
                       "type": "integer"
-                    },
-                    "non_duplicates_p": {
-                      "description": "The percentage of values that are non-recurring (e.g. [a,b,c,c] => [a,b])",
-                      "type": "number"
                     },
                     "distribution": {
                       "$ref": "#/definitions/distribution"
@@ -167,84 +143,6 @@
                       "description": "The column type definition in SQL database",
                       "type": "string"
                     },
-                    "valids": {
-                      "description": "The count of values that are non-null and not invalid",
-                      "type": "integer"
-                    },
-                    "valids_p": {
-                      "description": "The percentage of values that are non-null and not invalid",
-                      "type": "number"
-                    },
-                    "invalids": {
-                      "description": "The count of values that don't match the schema type. For example, a string in a numeric column.",
-                      "type": "integer"
-                    },
-                    "invalids_p": {
-                      "description": "The percentage of values that don't match the schema type. For example, a string in a numeric column.",
-                      "type": "number"
-                    },
-                    "zeros": {
-                      "description": "The count of numerical values that equal zero exactly",
-                      "type": "integer"
-                    },
-                    "zeros_p": {
-                      "description": "The percentage of numerical values that equal zero exactly",
-                      "type": "number"
-                    },
-                    "negatives": {
-                      "description": "The count of numerical values that are less than zero",
-                      "type": "integer"
-                    },
-                    "negatives_p": {
-                      "description": "The percentage of numerical values that are less than zero",
-                      "type": "number"
-                    },
-                    "positives": {
-                      "description": "The count of numerical values that are more than zero",
-                      "type": "integer"
-                    },
-                    "positives_p": {
-                      "description": "The percentage of numerical values that are more than zero",
-                      "type": "number"
-                    },
-                    "zero_length": {
-                      "description": "The count of string values with zero lengths exactly",
-                      "type": "integer"
-                    },
-                    "zero_length_p": {
-                      "description": "The percentage of string values with zero lengths exactly",
-                      "type": "number"
-                    },
-                    "non_zero_length": {
-                      "description": "The count of string values with non-zero lengths",
-                      "type": "integer"
-                    },
-                    "non_zero_length_p": {
-                      "description": "The percentage of string values with non-zero lengths",
-                      "type": "number"
-                    },
-                    "trues": {
-                      "description": "The count of boolean true values",
-                      "type": "integer"
-                    },
-                    "trues_p": {
-                      "description": "The percentage of boolean true values",
-                      "type": "number"
-                    },
-                    "falses": {
-                      "description": "The count of boolean false values",
-                      "type": "integer"
-                    },
-                    "falses_p": {
-                      "description": "The percentage of boolean false values",
-                      "type": "number"
-                    },
-                    "profile_duration": {
-                      "type": "string"
-                    },
-                    "elapsed_milli": {
-                      "type": "integer"
-                    },
                     "sum": {
                       "description": "The sum of a column's values",
                       "type": "number"
@@ -273,9 +171,21 @@
                       "description": "Count of records that contain trailing spaces only",
                       "type": "integer"
                     },
+                    "num_empty_values": {
+                      "description": "Count of records that contain blank spaces in the dataset",
+                      "type": "integer"
+                    },
+                    "decimal_digits": {
+                      "description": "Identifies the number of decimal digits for any given number",
+                      "type": "integer"
+                    },
                     "invalid_chars": {
                       "description": "List of values in a dataset which contains invalid alphabetical chars",
                       "type": "string"
+                    },
+                    "empty_null_constraint": {
+                      "description": "Provides True/False indicator if empty or null values are present in dataset",
+                      "type": "boolean"
                     },
                     "avg": {
                       "description": "The average of a column's values",

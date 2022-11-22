@@ -27,7 +27,6 @@ from piperider_cli.exitcode import EC_ERR_TEST_FAILED
 from piperider_cli.filesystem import FileSystem
 from piperider_cli.profiler import Profiler, ProfilerEventHandler
 
-
 class RunEventPayload:
 
     def __init__(self):
@@ -648,6 +647,7 @@ class Runner():
                 run_result['tables'][k]['dbt_assertion_result'] = v
 
         for t in run_result['tables']:
+            name_of_result_table = t
             run_result['tables'][t]['piperider_assertion_result'] = _transform_assertion_result(t, assertion_results)
             _clean_up_profile_null_properties(run_result['tables'][t])
         _show_summary(run_result, assertion_results, assertion_exceptions, dbt_test_results)
@@ -665,8 +665,13 @@ class Runner():
         output_path = prepare_default_output_path(filesystem, created_at, ds)
         output_file = os.path.join(output_path, 'run.json')
 
+        # console.print(run_result)
+        # console.print(run_result["tables"][name_of_result_table]["columns"])
+
+        # console.print(value_of_mode)
+
         with open(output_file, 'w') as f:
-            f.write(json.dumps(run_result, separators=(',', ':')))
+            f.write(json.dumps(run_result["tables"][name_of_result_table]["columns"], separators=(',', ':')))
 
         if output:
             clone_directory(output_path, output)

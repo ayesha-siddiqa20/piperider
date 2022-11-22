@@ -726,7 +726,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             # } if topk else None
             
             #new code: unique constraint
-            result["unique_check"] = (result["distinct_p"] == 1)
+            result["unique_check"] = (percentage(_distinct, _valids) == 1)
             return result
 
 
@@ -904,7 +904,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             result["kurtosis"] = _moment / (result['samples'] * (result['stddev'] ** 4))
                     
             #new code: unique constraint
-            result["unique_check"] = (result["distinct_p"] == 1)
+            result["unique_check"] = (percentage(_distinct, _valids)== 1)
 
             return result
 
@@ -1231,7 +1231,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             # } if histogram else None
 
             #new code: unique constraint
-            result["unique_check"] = (result["distinct_p"] == 1)
+            result["unique_check"] = (percentage(_distinct, _valids) == 1)
 
             return result
 
@@ -1424,7 +1424,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
             }
 
             #new code: unique constraint
-            result["unique_check"] = (result["distinct_p"] == 1)
+            result["unique_check"] = (percentage(_distinct, _valids) == 1)
 
             return result
 

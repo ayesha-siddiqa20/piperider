@@ -834,7 +834,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             } if histogram else None
 
             # new code: skewness
-            result["skewness"] = (3 * (result['avg'] - result['p50']) / result['stddev'])
+            result["skewness"] = (3 * (result['avg'] - result["quantiles"][2]) / result['stddev'])
             
             # new code: kurtosis
 

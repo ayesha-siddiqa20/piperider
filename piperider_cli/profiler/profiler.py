@@ -380,8 +380,8 @@ class Profiler:
                 self.event_handler.handle_table_progress(result, col_count, col_index)
             profile_end = time.perf_counter()
             duration = profile_end - profile_start
-            result["profile_duration"] = f"{duration:.2f}"
-            result["elapsed_milli"] = int(duration * 1000)
+            # result["profile_duration"] = f"{duration:.2f}"
+            # result["elapsed_milli"] = int(duration * 1000)
 
             self.event_handler.handle_table_end(result)
         else:
@@ -406,8 +406,8 @@ class Profiler:
                 finally:
                     profile_end = time.perf_counter()
                     duration = profile_end - profile_start
-                    result["profile_duration"] = f"{duration:.2f}"
-                    result["elapsed_milli"] = int(duration * 1000)
+                    # result["profile_duration"] = f"{duration:.2f}"
+                    # result["elapsed_milli"] = int(duration * 1000)
 
                     self.event_handler.handle_table_end(result)
 
@@ -463,8 +463,8 @@ class Profiler:
         duration = profile_end - profile_start
 
         result.update(profile_result)
-        result["profile_duration"] = f"{duration:.2f}"
-        result["elapsed_milli"] = int(duration * 1000)
+        # result["profile_duration"] = f"{duration:.2f}"
+        # result["elapsed_milli"] = int(duration * 1000)
 
         self.event_handler.handle_column_end(table.name, result)
 
@@ -843,11 +843,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
             if _valids > 0:
                 quantile = self._profile_quantile(conn, cte, cte.c.c, _valids)
             result.update({
-                # 'p5': quantile.get('p5'),
+                'p5': quantile.get('p5'),
                 'p25': quantile.get('p25'),
-                # 'p50': quantile.get('p50'),
-                # 'p75': quantile.get('p75'),
-                # 'p95': quantile.get('p95'),
+                'p50': quantile.get('p50'),
+                'p75': quantile.get('p75'),
+                'p95': quantile.get('p95'),
             })
 
             # # top k (integer only)
@@ -893,11 +893,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
             n, v = row
             quantile.append(v)
         return {
-            # 'p5': dtof(quantile[5 * n_bucket // 100]),
+            'p5': dtof(quantile[5 * n_bucket // 100]),
             'p25': dtof(quantile[25 * n_bucket // 100]),
-            # 'p50': dtof(quantile[50 * n_bucket // 100]),
-            # 'p75': dtof(quantile[75 * n_bucket // 100]),
-            # 'p95': dtof(quantile[95 * n_bucket // 100]),
+            'p50': dtof(quantile[50 * n_bucket // 100]),
+            'p75': dtof(quantile[75 * n_bucket // 100]),
+            'p95': dtof(quantile[95 * n_bucket // 100]),
         }
 
     def _profile_quantile_via_query_one_by_one(
@@ -926,11 +926,11 @@ class NumericColumnProfiler(BaseColumnProfiler):
             return dtof(result)
 
         return {
-            # 'p5': ntile(5),
+            'p5': ntile(5),
             'p25': ntile(25),
-            # 'p50': ntile(50),
-            # 'p75': ntile(75),
-            # 'p95': ntile(95),
+            'p50': ntile(50),
+            'p75': ntile(75),
+            'p95': ntile(95),
         }
 
     def _profile_quantile(
@@ -1000,9 +1000,9 @@ class NumericColumnProfiler(BaseColumnProfiler):
         return {
             # 'p5': dtof(result[0]),
             'p25': dtof(result[0]),
-            # 'p50': dtof(result[2]),
-            # 'p75': dtof(result[3]),
-            # 'p95': dtof(result[4]),
+            'p50': dtof(result[2]),
+            'p75': dtof(result[3]),
+            'p95': dtof(result[4]),
         }
 
     def _profile_histogram(

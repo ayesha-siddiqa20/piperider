@@ -181,11 +181,11 @@ class MetricName:
         self._add('duplicates', 'duplicate count', ['integer', 'numeric', 'string', 'datetime'])
         self._add('non_duplicates', 'non duplicate count', ['integer', 'numeric', 'string', 'datetime'])
         self._add('min', 'min', ['integer', 'numeric'])
-        # self._add('p5', '5th percentile', ['integer', 'numeric'])
+        self._add('p5', '5th percentile', ['integer', 'numeric'])
         self._add('p25', '25th percentile ', ['integer', 'numeric'])
-        # self._add('p50', 'median', ['integer', 'numeric'])
-        # self._add('p75', '75th percentile', ['integer', 'numeric'])
-        # self._add('p95', '95th percentile', ['integer', 'numeric'])
+        self._add('p50', 'median', ['integer', 'numeric'])
+        self._add('p75', '75th percentile', ['integer', 'numeric'])
+        self._add('p95', '95th percentile', ['integer', 'numeric'])
         self._add('max', 'max', ['integer', 'numeric'])
 
 

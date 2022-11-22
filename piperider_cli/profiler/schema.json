@@ -143,12 +143,6 @@
                       "description": "The column type definition in SQL database",
                       "type": "string"
                     },
-                    "profile_duration": {
-                      "type": "string"
-                    },
-                    "elapsed_milli": {
-                      "type": "integer"
-                    },
                     "sum": {
                       "description": "The sum of a column's values",
                       "type": "number"

@@ -147,22 +147,6 @@
                       "description": "The column type definition in SQL database",
                       "type": "string"
                     },
-                    "valids": {
-                      "description": "The count of values that are non-null and not invalid",
-                      "type": "integer"
-                    },
-                    "valids_p": {
-                      "description": "The percentage of values that are non-null and not invalid",
-                      "type": "number"
-                    },
-                    "invalids": {
-                      "description": "The count of values that don't match the schema type. For example, a string in a numeric column.",
-                      "type": "integer"
-                    },
-                    "invalids_p": {
-                      "description": "The percentage of values that don't match the schema type. For example, a string in a numeric column.",
-                      "type": "number"
-                    },
                     "zeros": {
                       "description": "The count of numerical values that equal zero exactly",
                       "type": "integer"

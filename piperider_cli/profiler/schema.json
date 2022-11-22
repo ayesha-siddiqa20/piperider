@@ -303,24 +303,8 @@
                       "description": "The maximum length of a string column",
                       "type": "integer"
                     },
-                    "p5": {
-                      "description": "The quantile value of the dataset (5th percentile)",
-                      "type": "number"
-                    },
-                    "p25": {
-                      "description": "The quantile value of the dataset (25th percentile)",
-                      "type": "number"
-                    },
-                    "p50": {
-                      "description": "The quantile value of the dataset (50th percentile)",
-                      "type": "number"
-                    },
-                    "p75": {
-                      "description": "The quantile value of the dataset (75th percentile)",
-                      "type": "number"
-                    },
-                    "p95": {
-                      "description": "The quantile value of the dataset (95th percentile)",
+                    "quantiles": {
+                      "description": "The quantile values of the dataset (5th, 25th, 50th, 75th, and 95th percentiles)",
                       "type": "number"
                     }
                   }

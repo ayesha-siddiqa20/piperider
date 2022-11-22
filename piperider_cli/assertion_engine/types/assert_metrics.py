@@ -167,7 +167,6 @@ class MetricName:
         self._add('invalids_p', 'invalid percentage')
         self._add('valids', 'valid count')
         self._add('valids_p', 'valid percentage')
-        self._add('zeros', 'zero count', ['integer', 'numeric'])
         self._add('zeros_p', 'zero percentage', ['integer', 'numeric'])
         self._add('negatives', 'negative value count', ['integer', 'numeric'])
         self._add('negatives_p', 'negative value percentage', ['integer', 'numeric'])
@@ -211,7 +210,6 @@ class MetricName:
         # self._add('p75', '75th percentile', ['integer', 'numeric'])
         # self._add('p95', '95th percentile', ['integer', 'numeric'])
         self._add('max', 'max', ['integer', 'numeric'])
-        self._add('num_empty_values', 'num_empty_values', ['string'])
 
 
     def _add(self, field, name, col_types: List[str] = None):

@@ -27,7 +27,7 @@ from ..configuration import Configuration
 
 HISTOGRAM_NUM_BUCKET = 50
 
-null = None
+number_print = 0
 
 def str_sql_format(text: str) -> str:
     """
@@ -632,10 +632,6 @@ class StringColumnProfiler(BaseColumnProfiler):
                 filter(func.REGEXP_CONTAINS(cte.c.c, '[^a-zA-Z0-9\s]'))).all()  # result [(id1,), (id2,), (id3,)]
             result5_list = list(chain(*result5))
 
-            result6 = (session.query((cte.c.c).label("_num_empty_values")).\
-                filter(and_(func.REGEXP_CONTAINS(cte.c.c, '[\s]+'), ~func.REGEXP_CONTAINS(cte.c.c, '[^\s]+'))))
-            _num_empty_values = session.execute(result6).first()[0]
-
             # code for mode
             t1, c1 = self._get_limited_table_cte()
             query1 = select((c1).label("item"), func.count().label("cnt")).group_by(c1).cte("query1")
@@ -680,7 +676,6 @@ class StringColumnProfiler(BaseColumnProfiler):
             _num_values_with_trailing_leading_spaces = dtof(_num_values_with_trailing_leading_spaces) # new code
             _num_leading_spaces_only = dtof(_num_leading_spaces_only)
             _num_trailing_spaces_only = dtof(_num_trailing_spaces_only)
-            _num_empty_values = 0 #dtof(_num_empty_values)
             result = {
                 'total': None,
                 'samples': _total,
@@ -713,7 +708,6 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'num_trailing_spaces_only': _num_trailing_spaces_only,
                 'invalid_chars': _invalid_chars,
                 'mode': _mode,
-                'num_empty_values': _num_empty_values,
 
             }
 
@@ -848,7 +842,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'valids_p': percentage(_valids, _total),
                 'invalids': _invalids,
                 'invalids_p': percentage(_invalids, _total),
-                'zeros': _zeros,
                 'zeros_p': percentage(_zeros, _total),
                 'negatives': _negatives,
                 'negatives_p': percentage(_negatives, _total),
@@ -866,7 +859,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'avg': _avg,
                 'stddev': _stddev,
                 'mode': _mode,
-                'num_empty_values': 0,
             }
 
             # uniqueness
@@ -1211,7 +1203,6 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 'min': _min.isoformat() if _min is not None else None,
                 'max': _max.isoformat() if _max is not None else None,
                 'mode': _mode,
-                'num_empty_values': 0,
             }
 
             # uniqueness
@@ -1422,7 +1413,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'distinct': _distinct,
                 'distinct_p': percentage(_distinct, _valids),
                 'mode': _mode,
-                'num_empty_values': 0,
+
                 # deprecated
                 # 'distribution': {
                 #     'type': "topk",

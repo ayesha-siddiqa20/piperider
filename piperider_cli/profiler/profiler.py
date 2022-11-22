@@ -540,7 +540,7 @@ class BaseColumnProfiler:
 
             return {
                 'total': None,
-                'samples': _total,
+                'num_records': _total,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distribution': None,
@@ -675,7 +675,7 @@ class StringColumnProfiler(BaseColumnProfiler):
 
             result = {
                 'total': None,
-                'samples': _total,
+                'num_records': _total,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
@@ -840,7 +840,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
 
             result = {
                 'total': None,
-                'samples': _total,
+                'num_records': _total,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
@@ -1202,7 +1202,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
 
             result = {
                 'total': None,
-                'samples': _total,
+                'num_records': _total,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
@@ -1413,7 +1413,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
 
             result = {
                 'total': None,
-                'samples': _total,
+                'num_records': _total,
                 'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,

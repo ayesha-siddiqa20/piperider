@@ -92,8 +92,8 @@
                       "description": "The count of values that are null type",
                       "type": "integer"
                     },
-                    "unique_records": {
-                      "description": "The count of non null values and non-empty values",
+                    "non_nulls": {
+                      "description": "The count of non null values",
                       "type": "integer"
                     },
                     "distinct": {

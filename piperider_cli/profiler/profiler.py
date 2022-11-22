@@ -541,7 +541,7 @@ class BaseColumnProfiler:
             return {
                 'total': None,
                 'samples': _total,
-                'unique_records': _non_nulls,
+                'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distribution': None,
             }
@@ -657,7 +657,6 @@ class StringColumnProfiler(BaseColumnProfiler):
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
             _non_zero_length = _valids - _zero_length
-            _unique_records = _total - (_nulls + _num_empty_values)
             _min = dtof(_min)
             _max = dtof(_max)
             _avg = dtof(_avg)
@@ -666,7 +665,6 @@ class StringColumnProfiler(BaseColumnProfiler):
             _num_leading_spaces_only = dtof(_num_leading_spaces_only)
             _num_trailing_spaces_only = dtof(_num_trailing_spaces_only)
             _num_empty_values = dtof(_num_empty_values)
-            _unique_records = dtof(_unique_records)
 
             # code for empty_null_constraint
 
@@ -678,7 +676,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'unique_records': _unique_records,
+                'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
                 'min': _min,
@@ -776,6 +774,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 func.max(func.length(func.ltrim(func.cast(cte.c.c, String), '0'))).label("_max_length_leading_zeroes"),
                 func.max(func.length(func.replace(func.ltrim(func.replace(func.cast(cte.c.c, String), '0', ' ')), ' ', '0'))).label("_max_length_after_trim"),
                 func.min(func.length(func.cast(cte.c.c, String))).label("_min_length"),
+                func.max(func.length(func.cast(cte.c.c, String))).label("_max_length"),
                 func.avg(cte.c.c).label("_avg"),
                 func.min(cte.c.c).label("_min"),
                 func.max(cte.c.c).label("_max"),
@@ -820,6 +819,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _max_length_leading_zeroes = dtof(_max_length_leading_zeroes) # new code
             _max_length_after_trim = dtof(_max_length_after_trim)
             _min_length = dtof(_min_length)
+            _max_length = dtof(_max_length)
             _avg = dtof(_avg)
             _stddev = dtof(_stddev)
 
@@ -833,7 +833,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'unique_records': _non_nulls,
+                'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
                 'min': _min,
@@ -843,6 +843,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'max_length_after_trim': _max_length_after_trim,
                 'decimal_digits': _decimal_digits,
                 'min_length': _min_length,
+                'max_length': _max_length,
                 'avg': _avg,
                 'stddev': _stddev,
                 'mode': _mode,
@@ -1183,7 +1184,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'unique_records': _non_nulls,
+                'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
                 'min': _min.isoformat() if _min is not None else None,
@@ -1391,7 +1392,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'unique_records': _non_nulls,
+                'non_nulls': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
                 'mode': _mode,

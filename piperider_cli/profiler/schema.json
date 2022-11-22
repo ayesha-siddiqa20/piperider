@@ -96,10 +96,6 @@
                       "description": "The count of values that are null type",
                       "type": "integer"
                     },
-                    "nulls_p": {
-                      "description": "The percentage of values that are null type",
-                      "type": "number"
-                    },
                     "non_nulls": {
                       "description": "The count of non null values",
                       "type": "integer"
@@ -206,14 +202,6 @@
                     "positives_p": {
                       "description": "The percentage of numerical values that are more than zero",
                       "type": "number"
-                    },
-                    "zero_length_p": {
-                      "description": "The percentage of string values with zero lengths exactly",
-                      "type": "number"
-                    },
-                    "non_zero_length": {
-                      "description": "The count of string values with non-zero lengths",
-                      "type": "integer"
                     },
                     "non_zero_length_p": {
                       "description": "The percentage of string values with non-zero lengths",

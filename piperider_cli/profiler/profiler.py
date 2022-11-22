@@ -794,7 +794,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                                    (func.count(cte.c.c) - 1) * func.count(cte.c.c)).label('_variance'))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _variance = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _max_length, _avg, _min, _max, _variance = result
                 _stddev = None
                 _mode = list(chain(*(session.execute(query2))))
 
@@ -804,7 +804,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 columns.append(func.stddev(cte.c.c).label("_stddev"))
                 stmt = select(columns)
                 result = conn.execute(stmt).fetchone() # new code
-                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _avg, _min, _max, _stddev = result
+                _total, _non_nulls, _valids, _zeros, _negatives, _distinct, _sum, _max_length_leading_zeroes, _max_length_after_trim, _min_length, _max_length, _avg, _min, _max, _stddev = result
                 _mode = list(chain(*(session.execute(query2))))
 
             if str(_mode) == "[None]":

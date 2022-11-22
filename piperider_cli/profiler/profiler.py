@@ -28,6 +28,7 @@ from ..configuration import Configuration
 HISTOGRAM_NUM_BUCKET = 50
 
 number_print = 0
+value_of_mode = ''
 
 def str_sql_format(text: str) -> str:
     """
@@ -657,6 +658,7 @@ class StringColumnProfiler(BaseColumnProfiler):
                 _invalid_chars = result5_list
                 _mode = list(chain(*(session.execute(query2))))
 
+            value_of_mode = _mode
             if str(_mode) == "[null]":
                 _mode = []
 

@@ -25,8 +25,7 @@ from piperider_cli.configuration import Configuration
 from piperider_cli.datasource import DataSource
 from piperider_cli.exitcode import EC_ERR_TEST_FAILED
 from piperider_cli.filesystem import FileSystem
-from piperider_cli.profiler import Profiler, ProfilerEventHandler
-
+from piperider_cli.profiler import Profiler, ProfilerEventHandler, value_of_mode
 
 class RunEventPayload:
 
@@ -668,6 +667,8 @@ class Runner():
 
         # console.print(run_result)
         # console.print(run_result["tables"][name_of_result_table]["columns"])
+
+        console.print(value_of_mode)
 
         with open(output_file, 'w') as f:
             f.write(json.dumps(run_result["tables"][name_of_result_table]["columns"], separators=(',', ':')))

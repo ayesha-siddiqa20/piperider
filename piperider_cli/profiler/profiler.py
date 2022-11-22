@@ -541,7 +541,7 @@ class BaseColumnProfiler:
             return {
                 'total': None,
                 'samples': _total,
-                'non_nulls': _non_nulls,
+                'unique_records': _non_nulls,
                 'nulls': _nulls,
                 'distribution': None,
             }
@@ -657,6 +657,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             _nulls = _total - _non_nulls
             _invalids = _non_nulls - _valids
             _non_zero_length = _valids - _zero_length
+            _unique_records = _total - (_nulls + _num_empty_values)
             _min = dtof(_min)
             _max = dtof(_max)
             _avg = dtof(_avg)
@@ -665,6 +666,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             _num_leading_spaces_only = dtof(_num_leading_spaces_only)
             _num_trailing_spaces_only = dtof(_num_trailing_spaces_only)
             _num_empty_values = dtof(_num_empty_values)
+            _unique_records = dtof(_unique_records)
 
             # code for empty_null_constraint
 
@@ -676,7 +678,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'non_nulls': _non_nulls,
+                'unique_records': _unique_records,
                 'nulls': _nulls,
                 'distinct': _distinct,
                 'min': _min,
@@ -831,7 +833,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'non_nulls': _non_nulls,
+                'unique_records': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
                 'min': _min,
@@ -1181,7 +1183,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'non_nulls': _non_nulls,
+                'unique_records': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
                 'min': _min.isoformat() if _min is not None else None,
@@ -1389,7 +1391,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
             result = {
                 'total': None,
                 'samples': _total,
-                'non_nulls': _non_nulls,
+                'unique_records': _non_nulls,
                 'nulls': _nulls,
                 'distinct': _distinct,
                 'mode': _mode,

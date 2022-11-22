@@ -159,7 +159,7 @@ class MetricName:
         self._add('total', 'row count')
         self._add('samples', 'sample count')
         self._add('nulls', 'missing count')
-        self._add('non_nulls', 'non null count')
+        self._add('unique_records', 'unique_records')
         self._add('min', 'min', ['integer', 'numeric', 'datetime'])
         self._add('max', 'max', ['integer', 'numeric', 'datetime'])
         self._add('avg', 'average', ['integer', 'numeric'])

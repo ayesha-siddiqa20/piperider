@@ -556,7 +556,6 @@ class BaseColumnProfiler:
                 'samples': _total,
                 'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
                 'valids': _valid,
                 'valids_p': percentage(_valid, _total),
@@ -680,7 +679,6 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'samples': _total,
                 'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
                 'valids': _valids,
                 'valids_p': percentage(_valids, _total),
@@ -689,7 +687,6 @@ class StringColumnProfiler(BaseColumnProfiler):
                 'non_zero_length_p': percentage(_non_zero_length, _total),
 
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'min': _min,
                 'min_length': _min,
                 'max': _max,
@@ -711,9 +708,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             _duplicates = _valids - _non_duplicates
             result.update({
                 "duplicates": _duplicates,
-                "duplicates_p": percentage(_duplicates, _valids),
                 "non_duplicates": _non_duplicates,
-                "non_duplicates_p": percentage(_non_duplicates, _valids),
             })
 
             # top k
@@ -830,7 +825,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'samples': _total,
                 'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
                 'valids': _valids,
                 'valids_p': percentage(_valids, _total),
@@ -843,7 +837,6 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'positives_p': percentage(_positives, _total),
 
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'min': _min,
                 'max': _max,
                 'sum': _sum,
@@ -860,9 +853,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
             _duplicates = _valids - _non_duplicates
             result.update({
                 "duplicates": _duplicates,
-                "duplicates_p": percentage(_duplicates, _valids),
                 "non_duplicates": _non_duplicates,
-                "non_duplicates_p": percentage(_non_duplicates, _valids),
             })
 
             # histogram
@@ -1185,14 +1176,12 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 'samples': _total,
                 'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
                 'valids': _valids,
                 'valids_p': percentage(_valids, _total),
                 'invalids': _invalids,
                 'invalids_p': percentage(_invalids, _total),
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'min': _min.isoformat() if _min is not None else None,
                 'max': _max.isoformat() if _max is not None else None,
                 'mode': _mode,
@@ -1203,9 +1192,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
             _duplicates = _valids - _non_duplicates
             result.update({
                 "duplicates": _duplicates,
-                "duplicates_p": percentage(_duplicates, _valids),
                 "non_duplicates": _non_duplicates,
-                "non_duplicates_p": percentage(_non_duplicates, _valids),
             })
 
             # histogram
@@ -1392,7 +1379,6 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'samples': _total,
                 'samples_p': None,
                 'non_nulls': _non_nulls,
-                'non_nulls_p': percentage(_non_nulls, _total),
                 'nulls': _nulls,
                 'valids': _valids,
                 'valids_p': percentage(_valids, _total),
@@ -1403,7 +1389,6 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'falses': _falses,
                 'falses_p': percentage(_falses, _total),
                 'distinct': _distinct,
-                'distinct_p': percentage(_distinct, _valids),
                 'mode': _mode,
 
                 # deprecated

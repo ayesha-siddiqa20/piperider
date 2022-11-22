@@ -100,33 +100,17 @@
                       "description": "The count of non null values",
                       "type": "integer"
                     },
-                    "non_nulls_p": {
-                      "description": "The percentage of non null values",
-                      "type": "number"
-                    },
                     "distinct": {
                       "description": "The count of distinct kinds of values (e.g. [a,b,c,c] => [a,b,c])",
                       "type": "integer"
-                    },
-                    "distinct_p": {
-                      "description": "The percentage of distinct kinds of values (e.g. [a,b,c,c] => [a,b,c])",
-                      "type": "number"
                     },
                     "duplicates": {
                       "description": "The count of values that are recurring (e.g. [a,b,c,c] => [c,c])",
                       "type": "integer"
                     },
-                    "duplicates_p": {
-                      "description": "The percentage of values that are recurring (e.g. [a,b,c,c] => [c,c])",
-                      "type": "number"
-                    },
                     "non_duplicates": {
                       "description": "The count of values that are non-recurring (e.g. [a,b,c,c] => [a,b])",
                       "type": "integer"
-                    },
-                    "non_duplicates_p": {
-                      "description": "The percentage of values that are non-recurring (e.g. [a,b,c,c] => [a,b])",
-                      "type": "number"
                     },
                     "distribution": {
                       "$ref": "#/definitions/distribution"

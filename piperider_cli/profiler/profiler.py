@@ -625,7 +625,7 @@ class StringColumnProfiler(BaseColumnProfiler):
 
             # code for num_empty_values
 
-            result6 = (session.query((cte.c.c).label("_num_empty_values")).\
+            result6 = (session.query(func.count(cte.c.c).label("_num_empty_values")).\
                 filter(and_(func.REGEXP_CONTAINS(cte.c.c, '[\s]+'), ~func.REGEXP_CONTAINS(cte.c.c, '[^\s]+'))))
             _num_empty_values = session.execute(result6).first()[0]
 

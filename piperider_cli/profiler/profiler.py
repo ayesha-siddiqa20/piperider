@@ -680,7 +680,7 @@ class StringColumnProfiler(BaseColumnProfiler):
             _num_values_with_trailing_leading_spaces = dtof(_num_values_with_trailing_leading_spaces) # new code
             _num_leading_spaces_only = dtof(_num_leading_spaces_only)
             _num_trailing_spaces_only = dtof(_num_trailing_spaces_only)
-            _num_empty_values = dtof(_num_empty_values)
+            _num_empty_values = 0 #dtof(_num_empty_values)
             result = {
                 'total': None,
                 'samples': _total,
@@ -866,7 +866,7 @@ class NumericColumnProfiler(BaseColumnProfiler):
                 'avg': _avg,
                 'stddev': _stddev,
                 'mode': _mode,
-                'num_empty_values': 'null',
+                'num_empty_values': 0,
             }
 
             # uniqueness
@@ -1211,7 +1211,7 @@ class DatetimeColumnProfiler(BaseColumnProfiler):
                 'min': _min.isoformat() if _min is not None else None,
                 'max': _max.isoformat() if _max is not None else None,
                 'mode': _mode,
-                'num_empty_values': 'null',
+                'num_empty_values': 0,
             }
 
             # uniqueness
@@ -1422,7 +1422,7 @@ class BooleanColumnProfiler(BaseColumnProfiler):
                 'distinct': _distinct,
                 'distinct_p': percentage(_distinct, _valids),
                 'mode': _mode,
-                'num_empty_values': 'null',
+                'num_empty_values': 0,
                 # deprecated
                 # 'distribution': {
                 #     'type': "topk",

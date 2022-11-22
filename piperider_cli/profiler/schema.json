@@ -269,6 +269,10 @@
                       "description": "Count of records that contain trailing spaces only",
                       "type": "integer"
                     },
+                    "num_empty_values": {
+                      "description": "Count of records that contain blank spaces",
+                      "type": "integer"
+                    },
                     "invalid_chars": {
                       "description": "List of values in a dataset which contains invalid alphabetical chars",
                       "type": "string"
